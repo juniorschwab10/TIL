@@ -1,10 +1,18 @@
+// Carrega as variáveis do .env (precisa vir antes de tudo que usa process.env)
+require("dotenv").config();
+
 const express = require("express");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
+// fs/promises: usado pra apagar o arquivo temporário depois do upload
+const fs = require("fs/promises");
 const banco = require("./src/config/database");
+const { cloudinary, upload } = require("./src/config/upload");
 const usuarios = require("./src/models/usuarios");
 const anuncios = require("./src/models/anuncios");
+const veiculos = require("./src/models/veiculos");
+const veiculosController = require("./src/controllers/veiculosController");
 
 const app = express();
 const PORT = 3000;
@@ -20,9 +28,18 @@ app.use(express.urlencoded({ extended: true }));
 // Permite receber dados em formato JSON
 app.use(express.json());
 
+// Avisa no terminal se esquecer de configurar o segredo da sessão,
+// em vez de deixar rodando com um valor fraco sem ninguém perceber.
+if (!process.env.SESSION_SECRET) {
+    console.warn(
+        "⚠️  SESSION_SECRET não definido no .env — usando um valor padrão " +
+        "só para desenvolvimento. Defina essa variável antes de publicar o site."
+    );
+}
+
 // Configura a sessão
 app.use(session({
-    secret: "segredo_super_secreto",
+    secret: process.env.SESSION_SECRET || "segredo_apenas_para_desenvolvimento",
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -93,7 +110,16 @@ app.get("/api/meu-perfil", exigirLogin, async (req, res) => {
         if (!usuario) {
             return res.status(404).json({ erro: "Usuário não encontrado." });
         }
-        res.json(usuario);
+
+        // Contagens reais para a seção "Minha atividade" do perfil
+        const totalAnuncios = await anuncios.contarPorUsuario(req.session.usuarioId);
+        const totalVeiculos = await veiculos.contarPorUsuario(req.session.usuarioId);
+
+        res.json({
+            ...usuario,
+            totalAnuncios,
+            totalVeiculos
+        });
     } catch (erro) {
         console.error("Erro ao buscar perfil:", erro);
         res.status(500).json({ erro: "Erro no servidor." });
@@ -255,7 +281,10 @@ app.get("/api/anuncios", async (req, res) => {
 });
 
 // Processa o formulário enviado da página "publicar-anuncio.html"
-app.post("/anuncios", exigirLogin, async (req, res) => {
+// upload.single("imagem") roda ANTES da função da rota. Ele pega o arquivo
+// que veio no campo name="imagem" do formulário e salva em uploads/.
+// Depois disso, o arquivo fica disponível em req.file.
+app.post("/anuncios", exigirLogin, upload.single("imagem"), async (req, res) => {
     const { nome, categoria, descricao, condicao, preco, marca, modelo, ano_inicial, ano_final } = req.body;
 
     if (!nome || !preco) {
@@ -263,11 +292,30 @@ app.post("/anuncios", exigirLogin, async (req, res) => {
     }
 
     try {
+        // Começa sem imagem — o anúncio pode ser publicado sem foto.
+        let urlImagem = null;
+
+        // req.file só existe se o usuário realmente escolheu um arquivo.
+        if (req.file) {
+            // Envia o arquivo temporário pro Cloudinary, que hospeda a imagem
+            // e devolve um resultado com a URL pública dela.
+            const resultado = await cloudinary.uploader.upload(req.file.path, {
+                folder: "til-anuncios"
+            });
+
+            urlImagem = resultado.secure_url;
+
+            // Apaga o arquivo temporário do servidor — a imagem já está
+            // no Cloudinary, não precisa ocupar espaço aqui.
+            await fs.unlink(req.file.path);
+        }
+
         await anuncios.criar({
             usuarioId: req.session.usuarioId,
             nome,
             categoria,
             descricao,
+            imagem: urlImagem,
             condicao,
             preco: parseFloat(preco),
             marca,
@@ -278,7 +326,12 @@ app.post("/anuncios", exigirLogin, async (req, res) => {
 
         res.redirect("/anuncios.html");
     } catch (erro) {
-        // Exibe o motivo exato da falha no terminal do Node
+        // Se deu erro depois do multer ter salvo o arquivo, tenta limpar
+        // o temporário pra não deixar lixo acumulando na pasta uploads/.
+        if (req.file) {
+            await fs.unlink(req.file.path).catch(() => {});
+        }
+
         console.error("Erro detalhado ao publicar anúncio:", erro);
         res.status(500).send("Erro interno ao publicar o anúncio.");
     }
@@ -311,6 +364,27 @@ app.get("/api/anuncios/:id", async (req, res) => {
 });
 
 //
+// ROTAS DE VEÍCULOS (garagem do usuário)
+//
+
+// Página "Minha garagem" — protegida por login
+app.get("/garagem", exigirLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "garagem.html"));
+});
+
+// API: lista os veículos do usuário logado
+app.get("/api/meus-veiculos", exigirLogin, veiculosController.listarMeus);
+
+// API: cria um veículo para o usuário logado
+app.post("/api/veiculos", exigirLogin, veiculosController.criar);
+
+// API: atualiza um veículo (só se for do usuário logado)
+app.put("/api/veiculos/:id", exigirLogin, veiculosController.atualizar);
+
+// API: exclui um veículo (só se for do usuário logado)
+app.delete("/api/veiculos/:id", exigirLogin, veiculosController.excluir);
+
+//
 // TESTE DO BANCO
 //
 
@@ -331,6 +405,16 @@ app.get("/teste-banco", async (req, res) => {
             erro: erro.message
         });
     }
+});
+
+// Tratamento de erros vindos do Multer (arquivo grande demais, tipo
+// inválido, etc.) — sem isso o usuário veria uma tela de erro genérica.
+app.use((erro, req, res, next) => {
+    if (erro) {
+        console.error("Erro no upload:", erro.message);
+        return res.status(400).send(erro.message);
+    }
+    next();
 });
 
 // ==========================

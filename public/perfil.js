@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const inputEmail = document.getElementById('input-email');
     const inputTelefone = document.getElementById('input-telefone');
     const formPerfil = document.getElementById('form-perfil');
+    const statVeiculos = document.getElementById('stat-veiculos');
+    const statAnuncios = document.getElementById('stat-anuncios');
 
     try {
         // Busca os dados do usuário conectado na sessão
@@ -28,6 +30,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (inputNome) inputNome.value = usuario.nome || '';
         if (inputEmail) inputEmail.value = usuario.email || '';
         if (inputTelefone) inputTelefone.value = usuario.telefone || '';
+
+        // Estatísticas reais de "Minha atividade"
+        if (statVeiculos) statVeiculos.innerText = usuario.totalVeiculos ?? 0;
+        if (statAnuncios) statAnuncios.innerText = usuario.totalAnuncios ?? 0;
 
     } catch (erro) {
         console.error('Erro ao carregar dados do perfil:', erro);

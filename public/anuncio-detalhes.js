@@ -40,12 +40,9 @@ async function carregarDetalhesAnuncio() {
 
         container.innerHTML = `
             <div>
-                <div class="mainphoto">${fotoTexto}</div>
-                <div class="thumbs">
-                    <i>1</i>
-                    <i>2</i>
-                    <i>3</i>
-                </div>
+                ${anuncio.imagem
+                    ? `<div class="mainphoto"><img src="${anuncio.imagem}" alt="${anuncio.nome}"></div>`
+                    : `<div class="mainphoto">${fotoTexto}</div>`}
             </div>
 
             <div class="data">

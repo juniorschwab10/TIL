@@ -1143,7 +1143,11 @@ aside input {
     padding-right: 45px;
 }
 
-.input-container img {
+/* Só o filho DIRETO (ex.: um ícone de "mostrar senha" logo dentro do
+   container) fica posicionado no canto do campo. Imagens aninhadas mais
+   profundamente (como a prévia de upload em publicar-anuncio.html, que
+   fica dentro de um <div> wrapper) não são afetadas por esta regra. */
+.input-container > img {
     position: absolute;
     right: 12px;
     top: 12px;

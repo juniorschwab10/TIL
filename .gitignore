@@ -1,0 +1,8 @@
+# Nunca suba credenciais pro GitHub
+.env
+
+# Dependências
+node_modules/
+
+# Arquivos temporários do multer (as imagens já vão pro Cloudinary)
+uploads/

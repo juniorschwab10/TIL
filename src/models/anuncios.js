@@ -10,7 +10,7 @@ class Anuncios {
 
     async buscarPorId(id) {
         const [linhas] = await banco.query(
-            "SELECT * FROM anuncios WHERE id = ?", 
+            "SELECT * FROM anuncios WHERE id = ?",
             [id]
         );
         return linhas.length > 0 ? linhas[0] : null;
@@ -22,6 +22,7 @@ class Anuncios {
             nome,
             categoria = null,
             descricao = null,
+            imagem = null,
             condicao = null,
             preco,
             marca = null,
@@ -32,13 +33,14 @@ class Anuncios {
 
         const [resultado] = await banco.query(
             `INSERT INTO anuncios 
-            (usuario_id, nome, categoria, descricao, condicao, preco, marca, modelo, ano_inicial, ano_final) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            (usuario_id, nome, categoria, descricao, imagem, condicao, preco, marca, modelo, ano_inicial, ano_final) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 usuarioId,
                 nome,
                 categoria,
                 descricao,
+                imagem,
                 condicao,
                 preco,
                 marca,
@@ -48,16 +50,17 @@ class Anuncios {
             ]
         );
 
-    async function contarPorUsuario(usuarioId) {
-        const sql = `
-            SELECT COUNT(*) AS total
-            FROM anuncios
-            WHERE usuario_id = ?
-        `;
-        const [linhas] = await banco.execute(sql, [usuarioId]);
-        return linhas[0].total;
+        return resultado.insertId;
     }
-    return resultado.insertId;
+
+    // Esta função estava por engano DENTRO do criar(), o que a deixava
+    // inacessível de fora. Agora é um método normal da classe.
+    async contarPorUsuario(usuarioId) {
+        const [linhas] = await banco.query(
+            "SELECT COUNT(*) AS total FROM anuncios WHERE usuario_id = ?",
+            [usuarioId]
+        );
+        return linhas[0].total;
     }
 }
 

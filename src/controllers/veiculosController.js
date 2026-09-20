@@ -1,65 +1,84 @@
 const veiculos = require("../models/veiculos");
 
-async function listar(req, res) {
+// Lista os veículos do usuário logado (usado na tela "Minha garagem")
+async function listarMeus(req, res) {
     try {
         const listaVeiculos = await veiculos.listarPorUsuario(req.session.usuarioId);
-        return res.render("veiculos", { veiculos: listaVeiculos });
+        return res.json(listaVeiculos);
     } catch (erro) {
         console.error("Erro ao listar veículos:", erro);
-        return res.status(500).send("Erro ao carregar veículos.");
+        return res.status(500).json({ erro: "Erro ao carregar veículos." });
     }
 }
 
+// Cria um veículo vinculado ao usuário logado
 async function criar(req, res) {
     const { marca, modelo, ano_inicial, ano_final } = req.body;
 
     if (!marca || !modelo || !ano_inicial) {
-        return res.status(400).send("Preencha marca, modelo e ano inicial.");
+        return res.status(400).json({ erro: "Preencha marca, modelo e ano inicial." });
     }
 
     try {
-        await veiculos.criar(req.session.usuarioId, marca, modelo, ano_inicial, ano_final || null);
-        return res.redirect("/veiculos");
+        const veiculo = await veiculos.criar(
+            req.session.usuarioId,
+            marca,
+            modelo,
+            ano_inicial,
+            ano_final || null
+        );
+        return res.status(201).json(veiculo);
     } catch (erro) {
         console.error("Erro ao criar veículo:", erro);
-        return res.status(500).send("Erro ao salvar o veículo.");
+        return res.status(500).json({ erro: "Erro ao salvar o veículo." });
     }
 }
 
+// Atualiza um veículo, garantindo que ele pertence ao usuário logado
 async function atualizar(req, res) {
     const { marca, modelo, ano_inicial, ano_final } = req.body;
 
     try {
         const veiculo = await veiculos.buscarPorId(req.params.id);
+
         if (!veiculo || veiculo.usuario_id !== req.session.usuarioId) {
-            return res.status(404).send("Veículo não encontrado.");
+            return res.status(404).json({ erro: "Veículo não encontrado." });
         }
 
-        await veiculos.atualizar(req.params.id, marca, modelo, ano_inicial, ano_final || null);
-        return res.redirect("/veiculos");
+        const atualizado = await veiculos.atualizar(
+            req.params.id,
+            marca,
+            modelo,
+            ano_inicial,
+            ano_final || null
+        );
+
+        return res.json(atualizado);
     } catch (erro) {
         console.error("Erro ao atualizar veículo:", erro);
-        return res.redirect(`/veiculos/${req.params.id}/editar`);
+        return res.status(500).json({ erro: "Erro ao atualizar o veículo." });
     }
 }
 
+// Exclui um veículo, garantindo que ele pertence ao usuário logado
 async function excluir(req, res) {
     try {
         const veiculo = await veiculos.buscarPorId(req.params.id);
+
         if (!veiculo || veiculo.usuario_id !== req.session.usuarioId) {
-            return res.status(404).send("Veículo não encontrado.");
+            return res.status(404).json({ erro: "Veículo não encontrado." });
         }
 
         await veiculos.excluir(req.params.id);
-        return res.redirect("/veiculos");
+        return res.json({ mensagem: "Veículo excluído com sucesso." });
     } catch (erro) {
         console.error("Erro ao excluir veículo:", erro);
-        return res.status(500).send("Erro ao excluir veículo.");
+        return res.status(500).json({ erro: "Erro ao excluir veículo." });
     }
 }
 
 module.exports = {
-    listar,
+    listarMeus,
     criar,
     atualizar,
     excluir
