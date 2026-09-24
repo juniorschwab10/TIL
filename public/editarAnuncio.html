@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <title>Editar anúncio | The Iron Legacy</title>
+  <link href="/style.css" rel="stylesheet"/>
+</head>
+<body>
+  <header class="header">
+    <div class="wrap">
+      <a class="logo" href="/">THE IRON <span>LEGACY</span></a>
+      <nav>
+        <a href="anuncios.html">Peças</a>
+        <a href="/garagem">Garagem</a>
+        <a href="perfil.html">Perfil</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <a class="back" href="/meus-anuncios">&larr; Voltar para meus anúncios</a>
+
+    <div class="heading">
+      <p class="eyebrow">EDITAR PEÇA</p>
+      <h1>Editar anúncio</h1>
+      <p class="muted">Altere as informações ou as fotos da sua peça.</p>
+    </div>
+
+    <form class="publish" id="form-editar-anuncio">
+    <section class="panel" id="painel-formulario">
+        <h2>Informações da peça</h2>
+        <p class="muted" id="carregando-aviso">Carregando dados do anúncio...</p>
+
+        <div class="grid">
+            <div class="input-container">
+                <label>Nome da peça</label>
+                <input name="nome" id="campo-nome" placeholder="Ex.: Carburador Weber 40" required/>
+            </div>
+
+            <div class="input-container">
+                <label>Categoria</label>
+                <select name="categoria" id="campo-categoria">
+                    <option value="">Selecione</option>
+                    <option value="Motor">Motor</option>
+                    <option value="Carroceria">Carroceria</option>
+                    <option value="Eletrica">Elétrica</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <label>Fotos da peça (até 3 no total)</label>
+
+            <!-- Fotos que já existem no anúncio — cada uma com um "✕" pra remover -->
+            <div id="fotos-existentes-wrapper" class="previa-imagens" style="display:none;"></div>
+
+            <small class="muted" id="aviso-limite-fotos"></small>
+
+            <!--
+              name="novasImagens" (plural) tem que bater com o
+              upload.array("novasImagens", 3) do server.js.
+            -->
+            <input type="file" name="novasImagens" accept="image/*" id="input-novas-imagens" multiple/>
+
+            <!-- Prévia das NOVAS fotos escolhidas (ainda não salvas) -->
+            <div id="previa-novas-imagens-wrapper" style="display:none;" class="previa-imagens"></div>
+        </div>
+
+        <!--
+          Marca/modelo/ano são do VEÍCULO com o qual a peça é compatível —
+          é isso que alimenta os filtros de busca do catálogo. Se a peça
+          servir em qualquer veículo, deixe em branco.
+        -->
+        <div class="grid">
+            <div class="input-container">
+                <label>Marca compatível</label>
+                <input name="marca" id="campo-marca" placeholder="Ex.: Chevrolet"/>
+            </div>
+
+            <div class="input-container">
+                <label>Modelo compatível</label>
+                <input name="modelo" id="campo-modelo" placeholder="Ex.: Opala"/>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="input-container">
+                <label>Ano inicial</label>
+                <input name="ano_inicial" id="campo-ano-inicial" type="number" placeholder="Ex.: 1975"/>
+            </div>
+
+            <div class="input-container">
+                <label>Ano final</label>
+                <input name="ano_final" id="campo-ano-final" type="number" placeholder="Opcional"/>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <label>Localização</label>
+            <input name="localizacao" id="campo-localizacao" placeholder="Ex.: Foz do Iguaçu, PR"/>
+        </div>
+
+        <div class="input-container">
+            <label>Descrição</label>
+            <textarea name="descricao" id="campo-descricao" placeholder="Descreva a peça..." rows="7"></textarea>
+        </div>
+
+        <div class="grid">
+            <div class="input-container">
+                <label>Condição</label>
+                <select name="condicao" id="campo-condicao">
+                    <option value="Usada">Usada</option>
+                    <option value="Nova">Nova</option>
+                </select>
+            </div>
+
+            <div class="input-container">
+                <label>Preço</label>
+                <input name="preco" id="campo-preco" placeholder="0,00" type="number" step="0.01" required/>
+            </div>
+        </div>
+
+        <button class="button primary" type="submit">Salvar alterações</button>
+    </section>
+    </form>
+  </main>
+
+  <!-- 1. Widget do VLibras (Tradução em Libras) -->
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+            <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+    </script>
+
+    <!-- 2. Botão Flutuante do WhatsApp -->
+    <a href="https://api.whatsapp.com/send?phone=5545999999999&text=Olá!%20Vim%20pelo%20site%20The%20Iron%20Legacy." 
+       class="whatsapp-float" 
+       target="_blank" 
+       aria-label="Contato via WhatsApp">
+       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+           <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3 18.6-68.1-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+       </svg>
+    </a>
+
+    <script>
+        // ID do anúncio vem da URL: /anuncios/:id/editar
+        const partesUrl = window.location.pathname.split('/'); // ["", "anuncios", "12", "editar"]
+        const anuncioId = partesUrl[2];
+
+        const LIMITE_FOTOS = 3;
+        let fotosExistentes = [];   // [{id, url}] — já salvas no banco
+        let novosArquivos = [];     // File[] — escolhidos agora, ainda não enviados
+
+        const wrapperExistentes = document.getElementById('fotos-existentes-wrapper');
+        const wrapperNovas = document.getElementById('previa-novas-imagens-wrapper');
+        const inputNovasImagens = document.getElementById('input-novas-imagens');
+        const avisoLimite = document.getElementById('aviso-limite-fotos');
+
+        function espacoLivre() {
+            return LIMITE_FOTOS - fotosExistentes.length - novosArquivos.length;
+        }
+
+        function atualizarAvisoLimite() {
+            const livre = espacoLivre();
+            avisoLimite.innerText = livre > 0
+                ? `Você pode adicionar mais ${livre} foto(s). Formatos aceitos: JPG, PNG, WEBP (cada uma até 5MB).`
+                : 'Limite de 3 fotos atingido. Remova alguma antes de adicionar outra.';
+            inputNovasImagens.disabled = livre <= 0;
+        }
+
+        // Redesenha as fotos JÁ SALVAS, cada uma com um botão "✕" que
+        // chama a API na hora (DELETE) — diferente das novas, que só
+        // são enviadas quando o formulário inteiro é salvo.
+        function renderizarFotosExistentes() {
+            wrapperExistentes.innerHTML = '';
+
+            if (fotosExistentes.length === 0) {
+                wrapperExistentes.style.display = 'none';
+                atualizarAvisoLimite();
+                return;
+            }
+
+            fotosExistentes.forEach(function (foto) {
+                const caixa = document.createElement('div');
+                caixa.style.cssText = 'position:relative; width:120px; height:120px;';
+
+                const img = document.createElement('img');
+                img.src = foto.url;
+                img.alt = 'Foto do anúncio';
+                img.style.cssText = 'width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid #ddd;';
+
+                const btnRemover = document.createElement('button');
+                btnRemover.type = 'button';
+                btnRemover.innerText = '✕';
+                btnRemover.title = 'Remover esta foto';
+                btnRemover.style.cssText = 'position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; border:none; background:#222; color:#fff; cursor:pointer; font-size:12px; line-height:1;';
+                btnRemover.addEventListener('click', () => removerFotoExistente(foto.id));
+
+                caixa.appendChild(img);
+                caixa.appendChild(btnRemover);
+                wrapperExistentes.appendChild(caixa);
+            });
+
+            wrapperExistentes.style.display = 'flex';
+            atualizarAvisoLimite();
+        }
+
+        // Foto já salva: remove na hora (não espera o "Salvar alterações"),
+        // porque a exclusão de foto individual é uma ação independente.
+        async function removerFotoExistente(imagemId) {
+            if (!confirm('Remover esta foto do anúncio?')) return;
+
+            try {
+                const resposta = await fetch(`/api/anuncios/${anuncioId}/imagens/${imagemId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!resposta.ok) {
+                    const erro = await resposta.json().catch(() => ({}));
+                    alert(erro.erro || 'Erro ao remover a foto.');
+                    return;
+                }
+
+                fotosExistentes = fotosExistentes.filter(f => f.id !== imagemId);
+                renderizarFotosExistentes();
+            } catch (erro) {
+                console.error('Erro ao remover foto:', erro);
+                alert('Erro ao remover a foto.');
+            }
+        }
+
+        // Redesenha as NOVAS fotos escolhidas (ainda não enviadas) e
+        // reconstrói o input.files a partir da lista própria — mesma
+        // técnica usada em publicar-anuncio.html, pra não perder a
+        // seleção anterior ao reabrir o seletor de arquivos.
+        function atualizarNovasImagens() {
+            const dt = new DataTransfer();
+            novosArquivos.forEach(arquivo => dt.items.add(arquivo));
+            inputNovasImagens.files = dt.files;
+
+            wrapperNovas.innerHTML = '';
+
+            if (novosArquivos.length === 0) {
+                wrapperNovas.style.display = 'none';
+                atualizarAvisoLimite();
+                return;
+            }
+
+            novosArquivos.forEach(function (arquivo, indice) {
+                const caixa = document.createElement('div');
+                caixa.style.cssText = 'position:relative; width:120px; height:120px;';
+
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(arquivo);
+                img.alt = 'Prévia da nova foto';
+                img.style.cssText = 'width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid #ddd;';
+
+                const btnRemover = document.createElement('button');
+                btnRemover.type = 'button';
+                btnRemover.innerText = '✕';
+                btnRemover.title = 'Remover esta foto';
+                btnRemover.style.cssText = 'position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; border:none; background:#222; color:#fff; cursor:pointer; font-size:12px; line-height:1;';
+                btnRemover.addEventListener('click', function () {
+                    novosArquivos.splice(indice, 1);
+                    atualizarNovasImagens();
+                });
+
+                caixa.appendChild(img);
+                caixa.appendChild(btnRemover);
+                wrapperNovas.appendChild(caixa);
+            });
+
+            wrapperNovas.style.display = 'flex';
+            atualizarAvisoLimite();
+        }
+
+        inputNovasImagens.addEventListener('change', function (evento) {
+            const escolhidos = Array.from(evento.target.files);
+            const livre = espacoLivre();
+
+            if (escolhidos.length > livre) {
+                alert(
+                    livre > 0
+                        ? `Só cabem mais ${livre} foto(s) nesse anúncio.`
+                        : 'Limite de 3 fotos atingido. Remova alguma antes de adicionar outra.'
+                );
+            }
+
+            escolhidos.slice(0, livre).forEach(arquivo => novosArquivos.push(arquivo));
+            atualizarNovasImagens();
+        });
+
+        // Carrega os dados atuais do anúncio e pré-preenche o formulário
+        async function carregarAnuncio() {
+            try {
+                const resposta = await fetch(`/api/anuncios/${anuncioId}/editar`);
+
+                if (resposta.status === 403) {
+                    alert('Você não tem permissão para editar este anúncio.');
+                    window.location.href = '/meus-anuncios';
+                    return;
+                }
+
+                if (!resposta.ok) {
+                    alert('Anúncio não encontrado.');
+                    window.location.href = '/meus-anuncios';
+                    return;
+                }
+
+                const anuncio = await resposta.json();
+
+                document.getElementById('campo-nome').value = anuncio.nome || '';
+                document.getElementById('campo-categoria').value = anuncio.categoria || '';
+                document.getElementById('campo-marca').value = anuncio.marca || '';
+                document.getElementById('campo-modelo').value = anuncio.modelo || '';
+                document.getElementById('campo-ano-inicial').value = anuncio.ano_inicial || '';
+                document.getElementById('campo-ano-final').value = anuncio.ano_final || '';
+                document.getElementById('campo-localizacao').value = anuncio.localizacao || '';
+                document.getElementById('campo-descricao').value = anuncio.descricao || '';
+                document.getElementById('campo-condicao').value = anuncio.condicao || 'Usada';
+                document.getElementById('campo-preco').value = anuncio.preco || '';
+
+                fotosExistentes = anuncio.imagens || [];
+                renderizarFotosExistentes();
+
+                document.getElementById('carregando-aviso').style.display = 'none';
+            } catch (erro) {
+                console.error('Erro ao carregar anúncio:', erro);
+                alert('Erro ao carregar os dados do anúncio.');
+            }
+        }
+
+        // Salva as alterações: texto + fotos novas (se houver), via PUT
+        document.getElementById('form-editar-anuncio').addEventListener('submit', async function (evento) {
+            evento.preventDefault();
+
+            const formData = new FormData();
+            formData.append('nome', document.getElementById('campo-nome').value);
+            formData.append('categoria', document.getElementById('campo-categoria').value);
+            formData.append('marca', document.getElementById('campo-marca').value);
+            formData.append('modelo', document.getElementById('campo-modelo').value);
+            formData.append('ano_inicial', document.getElementById('campo-ano-inicial').value);
+            formData.append('ano_final', document.getElementById('campo-ano-final').value);
+            formData.append('localizacao', document.getElementById('campo-localizacao').value);
+            formData.append('descricao', document.getElementById('campo-descricao').value);
+            formData.append('condicao', document.getElementById('campo-condicao').value);
+            formData.append('preco', document.getElementById('campo-preco').value);
+
+            novosArquivos.forEach(arquivo => formData.append('novasImagens', arquivo));
+
+            try {
+                const resposta = await fetch(`/api/anuncios/${anuncioId}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                if (!resposta.ok) {
+                    const erro = await resposta.json().catch(() => ({}));
+                    alert(erro.erro || 'Erro ao salvar as alterações.');
+                    return;
+                }
+
+                window.location.href = '/meus-anuncios';
+            } catch (erro) {
+                console.error('Erro ao salvar anúncio:', erro);
+                alert('Erro ao salvar as alterações.');
+            }
+        });
+
+        carregarAnuncio();
+    </script>
+
+    <!-- 3. Script do Painel de Acessibilidade -->
+    <script src="/acessibilidade.js"></script>
+</body>
+</html>

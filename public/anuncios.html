@@ -28,12 +28,67 @@
             <button class="button primary" onclick="window.location.href='publicar-anuncio.html'">+ Publicar anúncio</button>
         </div>
 
-        <div class="vehicles" id="container-anuncios">
-            <p class="muted">Carregando anúncios...</p>
+        <!-- Busca por palavra-chave + os dois filtros mais usados (categoria e condição) -->
+        <form class="search" id="form-busca">
+            <input type="search" id="campo-busca" name="busca" placeholder="Buscar por nome, marca, modelo...">
+
+            <select id="filtro-categoria" name="categoria">
+                <option value="">Todas as categorias</option>
+                <option value="Motor">Motor</option>
+                <option value="Carroceria">Carroceria</option>
+                <option value="Eletrica">Elétrica</option>
+            </select>
+
+            <select id="filtro-condicao" name="condicao">
+                <option value="">Nova ou usada</option>
+                <option value="Nova">Nova</option>
+                <option value="Usada">Usada</option>
+            </select>
+
+            <button type="submit">Buscar</button>
+        </form>
+
+        <div class="content">
+            <!-- Filtros combinados: marca, modelo, ano e localização do veículo compatível -->
+            <aside>
+                <h3>Filtros</h3>
+
+                <label for="filtro-marca">Marca</label>
+                <input id="filtro-marca" name="marca" placeholder="Ex.: Chevrolet">
+
+                <label for="filtro-modelo">Modelo</label>
+                <input id="filtro-modelo" name="modelo" placeholder="Ex.: Opala">
+
+                <label for="filtro-ano">Ano</label>
+                <input id="filtro-ano" name="ano" type="number" placeholder="Ex.: 1978">
+
+                <label for="filtro-localizacao">Localização</label>
+                <input id="filtro-localizacao" name="localizacao" placeholder="Ex.: Foz do Iguaçu, PR">
+
+                <p><button type="button" class="button secondary sm full-width" id="btn-limpar-filtros">Limpar filtros</button></p>
+            </aside>
+
+            <div>
+                <div class="resulthead">
+                    <span class="muted" id="contagem-resultados"></span>
+
+                    <select id="select-ordenar">
+                        <option value="relevancia">Relevância</option>
+                        <option value="recente">Mais recentes</option>
+                        <option value="menor-preco">Menor preço</option>
+                        <option value="maior-preco">Maior preço</option>
+                    </select>
+                </div>
+
+                <div class="vehicles" id="container-anuncios">
+                    <p class="muted">Carregando anúncios...</p>
+                </div>
+            </div>
         </div>
     </main>
 
     <!-- Importação do arquivo JavaScript separado -->
+    <script src="utils.js"></script>
     <script src="anuncios.js"></script>
 
     <!-- 1. Widget do VLibras (Tradução em Libras) -->

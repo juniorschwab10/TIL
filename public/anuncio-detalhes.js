@@ -10,7 +10,7 @@ async function carregarDetalhesAnuncio() {
     }
 
     try {
-        const resposta = await fetch(`/api/anuncios/${anuncioId}`);
+        const resposta = await fetch(`/api/anuncios/${encodeURIComponent(anuncioId)}`);
 
         if (!resposta.ok) {
             container.innerHTML = '<p class="muted">Anúncio não encontrado.</p>';
@@ -34,53 +34,94 @@ async function carregarDetalhesAnuncio() {
             .substring(0, 2)
             .toUpperCase();
 
-        const tagCategoria = (anuncio.categoria || 'Motor').toUpperCase();
-        const fotoTexto = (anuncio.marca || anuncio.modelo || 'OPALA').toUpperCase();
-        const telefoneVendedor = anuncio.vendedor?.telefone || '';
+        // escapeHtml (utils.js): tudo que veio do banco passa por ele antes
+        // de entrar no innerHTML, pra evitar XSS.
+        const tagCategoria = escapeHtml((anuncio.categoria || 'Motor').toUpperCase());
+        const fotoTexto = escapeHtml((anuncio.marca || anuncio.modelo || 'OPALA').toUpperCase());
+        const listaFotos = anuncio.imagens || []; // array de URLs, pode vir vazio
+
+        // Monta a foto principal (a div .mainphoto completa): com imagem
+        // real se tiver, ou com o bloco de texto de sempre se não tiver.
+        const fotoPrincipal = listaFotos.length > 0
+            ? `<div class="mainphoto" id="wrapper-foto-principal"><img id="foto-principal" src="${escapeHtml(listaFotos[0])}" alt="${escapeHtml(anuncio.nome)}"></div>`
+            : `<div class="mainphoto" id="wrapper-foto-principal">${fotoTexto}</div>`;
+
+        // Miniaturas clicáveis: só aparecem se tiver mais de 1 foto,
+        // já que com 1 foto só não faz sentido trocar de imagem.
+        // A imagem de fundo de cada miniatura é aplicada logo abaixo, via
+        // JavaScript, em vez de montar um style="..." com a URL dentro do HTML.
+        const miniaturas = listaFotos.length > 1
+            ? listaFotos.map(url => `
+                <i class="thumb-clicavel" data-url="${escapeHtml(url)}"></i>
+              `).join('')
+            : '';
+
+        // Telefone: o cadastro aceita formatos como "(45) 99999-9999", mas o
+        // link do WhatsApp só entende dígitos, com o código do país (55).
+        const telefoneVendedor = String(anuncio.vendedor?.telefone || '');
+        const telefoneDigitos = telefoneVendedor.replace(/\D/g, '');
+        const telefoneWhats = telefoneDigitos.length <= 11 ? `55${telefoneDigitos}` : telefoneDigitos;
+        const linkConversa = telefoneDigitos
+            ? `https://api.whatsapp.com/send?phone=${telefoneWhats}&text=${encodeURIComponent(`Olá, tenho interesse no anúncio ${anuncio.nome}`)}`
+            : 'chat.html';
 
         container.innerHTML = `
             <div>
-                ${anuncio.imagem
-                    ? `<div class="mainphoto"><img src="${anuncio.imagem}" alt="${anuncio.nome}"></div>`
-                    : `<div class="mainphoto">${fotoTexto}</div>`}
+                ${fotoPrincipal}
+                ${miniaturas ? `<div class="thumbs">${miniaturas}</div>` : ''}
             </div>
 
             <div class="data">
                 <span class="tag">${tagCategoria}</span>
-                <h1>${anuncio.nome}</h1>
-                <p class="muted">📍 Paraná, Brasil</p>
+                <h1>${escapeHtml(anuncio.nome)}</h1>
+                <p class="muted">📍 ${escapeHtml(anuncio.localizacao || 'Localização não informada')}</p>
 
                 <div class="price">${precoFormatado}</div>
-                <p class="muted">${anuncio.descricao || 'Sem descrição informada.'}</p>
+                <p class="muted">${escapeHtml(anuncio.descricao || 'Sem descrição informada.')}</p>
 
                 <div class="specs">
                     <div>
                         <small>CONDIÇÃO</small>
-                        <b>${anuncio.condicao || 'Usada'}</b>
+                        <b>${escapeHtml(anuncio.condicao || 'Usada')}</b>
                     </div>
                     <div>
                         <small>MARCA</small>
-                        <b>${anuncio.marca || 'Universal'}</b>
+                        <b>${escapeHtml(anuncio.marca || 'Universal')}</b>
                     </div>
                     <div>
                         <small>MODELO</small>
-                        <b>${anuncio.modelo || 'Geral'}</b>
+                        <b>${escapeHtml(anuncio.modelo || 'Geral')}</b>
                     </div>
                 </div>
 
                 <button class="button primary">Tenho interesse</button>
-                <a class="button secondary" href="${telefoneVendedor ? `https://api.whatsapp.com/send?phone=${telefoneVendedor}&text=Olá,%20tenho%20interesse%20no%20anúncio%20${encodeURIComponent(anuncio.nome)}` : 'chat.html'}" target="_blank">Conversar com vendedor</a>
+                <a class="button secondary" href="${linkConversa}" target="_blank" rel="noopener">Conversar com vendedor</a>
 
                 <div class="seller">
-                    <div class="avatar">${iniciais}</div>
+                    <div class="avatar">${escapeHtml(iniciais)}</div>
                     <div>
                         <small>Vendedor</small>
-                        <b>${vendedorNome}</b>
-                        <span>${telefoneVendedor ? `Tel: ${telefoneVendedor}` : 'Contato não informado'}</span>
+                        <b>${escapeHtml(vendedorNome)}</b>
+                        <span>${telefoneVendedor ? `Tel: ${escapeHtml(telefoneVendedor)}` : 'Contato não informado'}</span>
                     </div>
                 </div>
             </div>
         `;
+
+        // Aplica a imagem de fundo de cada miniatura e faz cada uma, ao ser
+        // clicada, virar a foto principal. Só existe algo pra fazer aqui se
+        // houver miniaturas (mais de 1 foto).
+        document.querySelectorAll('.thumb-clicavel').forEach(function (miniatura) {
+            // JSON.stringify coloca aspas e escapa qualquer caractere perigoso da URL
+            miniatura.style.backgroundImage = `url(${JSON.stringify(miniatura.dataset.url)})`;
+
+            miniatura.addEventListener('click', function () {
+                const fotoPrincipalImg = document.getElementById('foto-principal');
+                if (fotoPrincipalImg) {
+                    fotoPrincipalImg.src = miniatura.dataset.url;
+                }
+            });
+        });
     } catch (erro) {
         console.error("Erro ao carregar os detalhes:", erro);
         container.innerHTML = '<p class="muted">Erro ao carregar as informações do anúncio.</p>';

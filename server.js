@@ -1,6 +1,3 @@
-// Carrega as variáveis do .env (precisa vir antes de tudo que usa process.env)
-require("dotenv").config();
-
 const express = require("express");
 const path = require("path");
 const bcrypt = require("bcryptjs");
@@ -12,7 +9,9 @@ const { cloudinary, upload } = require("./src/config/upload");
 const usuarios = require("./src/models/usuarios");
 const anuncios = require("./src/models/anuncios");
 const veiculos = require("./src/models/veiculos");
+const imagens = require("./src/models/imagens");
 const veiculosController = require("./src/controllers/veiculosController");
+const anunciosController = require("./src/controllers/anuncioController");
 
 const app = express();
 const PORT = 3000;
@@ -28,18 +27,9 @@ app.use(express.urlencoded({ extended: true }));
 // Permite receber dados em formato JSON
 app.use(express.json());
 
-// Avisa no terminal se esquecer de configurar o segredo da sessão,
-// em vez de deixar rodando com um valor fraco sem ninguém perceber.
-if (!process.env.SESSION_SECRET) {
-    console.warn(
-        "⚠️  SESSION_SECRET não definido no .env — usando um valor padrão " +
-        "só para desenvolvimento. Defina essa variável antes de publicar o site."
-    );
-}
-
 // Configura a sessão
 app.use(session({
-    secret: process.env.SESSION_SECRET || "segredo_apenas_para_desenvolvimento",
+    secret: "segredo_super_secreto",
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -269,10 +259,29 @@ app.get("/logout", (req, res) => {
 // ROTAS DE ANÚNCIOS
 //
 
-// API para buscar a lista de anúncios cadastrados (usada via Fetch no HTML)
+// API para buscar a lista de anúncios cadastrados (usada via Fetch no HTML).
+// Aceita busca por palavra-chave, filtros combinados e ordenação via
+// query string, por exemplo:
+//   /api/anuncios?busca=carburador&categoria=Motor&ordenar=menor-preco
 app.get("/api/anuncios", async (req, res) => {
     try {
-        const listaAnuncios = await anuncios.listarTodos();
+        const { busca, marca, modelo, ano, categoria, condicao, localizacao, ordenar } = req.query;
+
+        // Ano precisa ser um número válido pra entrar no filtro — um
+        // "?ano=abc" na URL, por exemplo, é simplesmente ignorado.
+        const anoNumero = Number(ano);
+
+        const listaAnuncios = await anuncios.listarTodos({
+            busca: busca?.trim() || undefined,
+            marca: marca?.trim() || undefined,
+            modelo: modelo?.trim() || undefined,
+            ano: ano && Number.isInteger(anoNumero) ? anoNumero : undefined,
+            categoria: categoria?.trim() || undefined,
+            condicao: condicao?.trim() || undefined,
+            localizacao: localizacao?.trim() || undefined,
+            ordenar: ordenar?.trim() || undefined
+        });
+
         res.json(listaAnuncios);
     } catch (erro) {
         console.error("Erro na rota /api/anuncios:", erro);
@@ -281,55 +290,57 @@ app.get("/api/anuncios", async (req, res) => {
 });
 
 // Processa o formulário enviado da página "publicar-anuncio.html"
-// upload.single("imagem") roda ANTES da função da rota. Ele pega o arquivo
-// que veio no campo name="imagem" do formulário e salva em uploads/.
-// Depois disso, o arquivo fica disponível em req.file.
-app.post("/anuncios", exigirLogin, upload.single("imagem"), async (req, res) => {
-    const { nome, categoria, descricao, condicao, preco, marca, modelo, ano_inicial, ano_final } = req.body;
+// upload.array("imagens", 3) roda ANTES da função da rota. Ele pega até
+// 3 arquivos vindos do campo name="imagens" e salva em uploads/.
+// Depois disso, os arquivos ficam disponíveis em req.files (um array,
+// mesmo que a pessoa mande só 1 foto).
+app.post("/anuncios", exigirLogin, upload.array("imagens", 3), async (req, res) => {
+    const { nome, categoria, descricao, condicao, preco, marca, modelo, ano_inicial, ano_final, localizacao } = req.body;
 
     if (!nome || !preco) {
         return res.status(400).send("O nome e o preço da peça são obrigatórios.");
     }
 
     try {
-        // Começa sem imagem — o anúncio pode ser publicado sem foto.
-        let urlImagem = null;
-
-        // req.file só existe se o usuário realmente escolheu um arquivo.
-        if (req.file) {
-            // Envia o arquivo temporário pro Cloudinary, que hospeda a imagem
-            // e devolve um resultado com a URL pública dela.
-            const resultado = await cloudinary.uploader.upload(req.file.path, {
-                folder: "til-anuncios"
-            });
-
-            urlImagem = resultado.secure_url;
-
-            // Apaga o arquivo temporário do servidor — a imagem já está
-            // no Cloudinary, não precisa ocupar espaço aqui.
-            await fs.unlink(req.file.path);
-        }
-
-        await anuncios.criar({
+        const idAnuncio = await anuncios.criar({
             usuarioId: req.session.usuarioId,
             nome,
             categoria,
             descricao,
-            imagem: urlImagem,
             condicao,
             preco: parseFloat(preco),
             marca,
             modelo,
-            anoInicial: ano_inicial,
-            anoFinal: ano_final
+            anoInicial: ano_inicial || null,
+            anoFinal: ano_final || null,
+            localizacao
         });
+
+        // req.files é um array. Se ninguém escolheu foto, ele vem vazio ([]),
+        // então o for simplesmente não roda nenhuma vez — sem erro.
+        for (const arquivo of req.files) {
+            const resultado = await cloudinary.uploader.upload(arquivo.path, {
+                folder: "til-anuncios"
+            });
+
+            // Salva uma linha na tabela imagens pra cada foto, ligada
+            // ao anúncio que acabou de ser criado. Guardamos o public_id
+            // também — é o que permite apagar a foto do Cloudinary depois,
+            // se o usuário excluir a foto ou o anúncio inteiro.
+            await imagens.adicionar(idAnuncio, resultado.secure_url, resultado.public_id);
+
+            // Apaga o arquivo temporário — já está hospedado no Cloudinary.
+            await fs.unlink(arquivo.path);
+        }
 
         res.redirect("/anuncios.html");
     } catch (erro) {
-        // Se deu erro depois do multer ter salvo o arquivo, tenta limpar
-        // o temporário pra não deixar lixo acumulando na pasta uploads/.
-        if (req.file) {
-            await fs.unlink(req.file.path).catch(() => {});
+        // Se deu erro no meio do caminho, limpa os temporários que
+        // sobraram, pra não acumular lixo na pasta uploads/.
+        if (req.files) {
+            for (const arquivo of req.files) {
+                await fs.unlink(arquivo.path).catch(() => {});
+            }
         }
 
         console.error("Erro detalhado ao publicar anúncio:", erro);
@@ -349,8 +360,12 @@ app.get("/api/anuncios/:id", async (req, res) => {
         // Busca os dados do vendedor (usuário) para exibir nome/telefone no anúncio
         const vendedor = await usuarios.buscarPorId(anuncio.usuario_id);
 
+        // Busca todas as fotos desse anúncio (0, 1, 2 ou 3)
+        const fotos = await imagens.listarPorAnuncio(anuncio.id);
+
         res.json({
             ...anuncio,
+            imagens: fotos.map(f => f.url),
             vendedor: vendedor ? {
                 nome: vendedor.nome,
                 email: vendedor.email,
@@ -362,6 +377,37 @@ app.get("/api/anuncios/:id", async (req, res) => {
         res.status(500).json({ erro: "Erro ao carregar os detalhes do anúncio." });
     }
 });
+
+//
+// ROTAS DE "MEUS ANÚNCIOS" (listar / editar / excluir os próprios anúncios)
+//
+
+// Página "Meus anúncios" — protegida por login
+app.get("/meus-anuncios", exigirLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "meusAnuncios.html"));
+});
+
+// Página de edição de um anúncio específico — protegida por login.
+// A checagem de QUEM é o dono acontece na API (abaixo), não aqui:
+// esta rota só entrega o HTML, quem busca os dados é o fetch do front-end.
+app.get("/anuncios/:id/editar", exigirLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "editarAnuncio.html"));
+});
+
+// API: lista os anúncios do usuário logado
+app.get("/api/meus-anuncios", exigirLogin, anunciosController.listarMeus);
+
+// API: busca um anúncio (com fotos) pra pré-preencher a edição — só o dono pode
+app.get("/api/anuncios/:id/editar", exigirLogin, anunciosController.buscarParaEditar);
+
+// API: atualiza texto + adiciona novas fotos (até o limite de 3 no total)
+app.put("/api/anuncios/:id", exigirLogin, upload.array("novasImagens", 3), anunciosController.atualizar);
+
+// API: remove uma foto específica de um anúncio
+app.delete("/api/anuncios/:id/imagens/:imagemId", exigirLogin, anunciosController.excluirImagem);
+
+// API: exclui o anúncio inteiro (e todas as suas fotos, banco + Cloudinary)
+app.delete("/api/anuncios/:id", exigirLogin, anunciosController.excluir);
 
 //
 // ROTAS DE VEÍCULOS (garagem do usuário)

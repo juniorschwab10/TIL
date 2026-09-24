@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuário não encontrado | The Iron Legacy</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="wrap flex-between">
+            <div>
+                <a class="logo" href="/">THE IRON <span>LEGACY</span></a>
+                <span class="badge-adm">ADMIN</span>
+            </div>
+            <nav class="nav">
+                <a href="/adm">Painel</a>
+                <a href="/logout">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap main-adm">
+        <div class="adm-top">
+            <div>
+                <p class="eyebrow">NÃO ENCONTRADO</p>
+                <h1>Usuário não encontrado</h1>
+                <p class="muted"><%= mensagem %></p>
+            </div>
+        </div>
+
+        <a class="button primary" href="/adm">Voltar para o painel</a>
+    </main>
+</body>
+</html>

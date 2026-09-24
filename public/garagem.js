@@ -59,10 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const artigo = document.createElement('article');
                 artigo.className = 'vehicle';
                 artigo.innerHTML = `
-                    <div class="vehiclephoto">${veiculo.marca.toUpperCase()}</div>
+                    <div class="vehiclephoto">${escapeHtml(veiculo.marca.toUpperCase())}</div>
                     <div class="info">
-                        <span>${periodo}</span>
-                        <h2>${veiculo.marca} ${veiculo.modelo}</h2>
+                        <span>${escapeHtml(periodo)}</span>
+                        <h2>${escapeHtml(veiculo.marca)} ${escapeHtml(veiculo.modelo)}</h2>
                         <div class="row">
                             <button class="button secondary sm btn-editar">Editar</button>
                             <button class="button secondary sm btn-excluir">Excluir</button>

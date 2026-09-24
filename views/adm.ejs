@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração | The Iron Legacy</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="wrap flex-between">
+            <div>
+                <a class="logo" href="/">THE IRON <span>LEGACY</span></a>
+                <span class="badge-adm">ADMIN</span>
+            </div>
+            <nav class="nav">
+                <a href="/">Ver site</a>
+                <a href="/logout">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap main-adm">
+        <div class="adm-top">
+            <div>
+                <p class="eyebrow">PAINEL DE ADMINISTRAÇÃO</p>
+                <h1>Usuários</h1>
+                <p class="muted">Veja, edite ou exclua as contas cadastradas na plataforma.</p>
+            </div>
+        </div>
+
+        <div class="adm-grid">
+            <div class="adm-card">
+                <div class="adm-card-header">
+                    <h3>Usuários cadastrados</h3>
+                    <span class="adm-card-icon">👥</span>
+                </div>
+                <span class="stat-number"><%= listaUsuarios.length %></span>
+                <span class="stat-trend neutral">Total na plataforma</span>
+            </div>
+        </div>
+
+        <section class="panel adm-table-container">
+            <div class="table-header">
+                <h2>Contas cadastradas</h2>
+                <input type="search" id="busca-usuario" class="table-search" placeholder="Buscar por nome, e-mail ou telefone">
+            </div>
+
+            <div class="table-responsive">
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>E-mail</th>
+                            <th>Telefone</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-tabela">
+                        <% if (listaUsuarios.length === 0) { %>
+                        <tr>
+                            <td colspan="5">Nenhum usuário cadastrado.</td>
+                        </tr>
+                        <% } %>
+
+                        <% listaUsuarios.forEach(function (u) { %>
+                        <tr>
+                            <td><%= u.id %></td>
+                            <td>
+                                <%= u.nome %>
+                                <% if (Number(u.id) === adminId) { %>
+                                <span class="badge-adm">ADMIN</span>
+                                <% } %>
+                            </td>
+                            <td><%= u.email %></td>
+                            <td><%= u.telefone %></td>
+                            <td>
+                                <div class="table-buttons">
+                                    <a class="button secondary sm" href="/usuarios/<%= u.id %>">Ver</a>
+                                    <a class="button secondary sm" href="/usuarios/<%= u.id %>/editar">Editar</a>
+                                    <% if (Number(u.id) !== adminId) { %>
+                                    <!-- O nome vai num data-attribute (e não dentro do onsubmit) de propósito:
+                                         colocar texto do usuário dentro de JavaScript inline abriria uma brecha de XSS. -->
+                                    <form class="form-excluir" method="POST" action="/usuarios/<%= u.id %>/excluir" data-nome="<%= u.nome %>">
+                                        <button type="submit" class="button danger sm">Excluir</button>
+                                    </form>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Pede confirmação antes de excluir uma conta
+        document.querySelectorAll('.form-excluir').forEach(function (formulario) {
+            formulario.addEventListener('submit', function (evento) {
+                const nome = formulario.dataset.nome;
+                if (!confirm('Excluir o usuário "' + nome + '"? Essa ação não pode ser desfeita.')) {
+                    evento.preventDefault();
+                }
+            });
+        });
+
+        // Filtra as linhas da tabela conforme o texto digitado na busca
+        const campoBusca = document.getElementById('busca-usuario');
+        const linhas = document.querySelectorAll('#corpo-tabela tr');
+
+        campoBusca.addEventListener('input', function () {
+            const termo = campoBusca.value.trim().toLowerCase();
+
+            linhas.forEach(function (linha) {
+                linha.style.display = linha.textContent.toLowerCase().includes(termo) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -36,39 +36,69 @@
     <section class="panel">
         <h2>Informações da peça</h2>
 
-        <div class="input-container">
-            <label>Nome da peça</label>
-            <input name="nome" placeholder="Ex.: Carburador Weber 40" required/>
-        </div>
+        <div class="grid">
+            <div class="input-container">
+                <label>Nome da peça</label>
+                <input name="nome" placeholder="Ex.: Carburador Weber 40" required/>
+            </div>
 
-        <div class="input-container">
-            <label>Foto da peça</label>
-            <!-- O name="imagem" tem que bater com o upload.single("imagem") do server.js -->
-            <input type="file" name="imagem" accept="image/*" id="input-imagem"/>
-            <small class="muted">Opcional. Formatos aceitos: JPG, PNG, WEBP (até 5MB).</small>
-            <!--
-              Prévia da imagem escolhida. Fica dentro de um wrapper (div)
-              de propósito: a regra ".input-container > img" do style.css
-              só afeta o FILHO DIRETO do container, então colocar a <img>
-              um nível mais fundo garante que ela nunca herde aquele
-              position:absolute pensado pra ícones de campo.
-            -->
-            <div style="display:none; margin-top:12px;" id="previa-imagem-wrapper">
-                <img id="previa-imagem" alt="Prévia da imagem selecionada"
-                     style="max-width:100%; max-height:220px; object-fit:contain; border-radius:8px; border:1px solid #ddd;"/>
+            <div class="input-container">
+                <label>Categoria</label>
+                <select name="categoria">
+                    <option value="">Selecione</option>
+                    <option value="Motor">Motor</option>
+                    <option value="Carroceria">Carroceria</option>
+                    <option value="Eletrica">Elétrica</option>
+                </select>
             </div>
         </div>
 
+        <!--
+          Marca/modelo/ano são do VEÍCULO com o qual a peça é compatível —
+          é isso que alimenta os filtros de busca do catálogo. Se a peça
+          servir em qualquer veículo, deixe em branco.
+        -->
+        <div class="grid">
+            <div class="input-container">
+                <label>Marca compatível</label>
+                <input name="marca" placeholder="Ex.: Chevrolet"/>
+            </div>
 
+            <div class="input-container">
+                <label>Modelo compatível</label>
+                <input name="modelo" placeholder="Ex.: Opala"/>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="input-container">
+                <label>Ano inicial</label>
+                <input name="ano_inicial" type="number" placeholder="Ex.: 1975"/>
+            </div>
+
+            <div class="input-container">
+                <label>Ano final</label>
+                <input name="ano_final" type="number" placeholder="Opcional"/>
+            </div>
+        </div>
 
         <div class="input-container">
-            <label>Categoria</label>
-            <select name="categoria">
-                <option value="">Selecione</option>
-                <option value="Motor">Motor</option>
-                <option value="Carroceria">Carroceria</option>
-                <option value="Eletrica">Elétrica</option>
-            </select>
+            <label>Localização</label>
+            <input name="localizacao" placeholder="Ex.: Foz do Iguaçu, PR"/>
+        </div>
+
+        <div class="input-container">
+            <label>Fotos da peça (até 3)</label>
+            <!--
+              multiple: permite escolher vários arquivos de uma vez.
+              name="imagens" (plural) tem que bater com o
+              upload.array("imagens", 3) do server.js.
+            -->
+            <input type="file" name="imagens" accept="image/*" id="input-imagens" multiple/>
+            <small class="muted">Opcional. Escolha até 3 fotos. Formatos aceitos: JPG, PNG, WEBP (cada uma até 5MB).</small>
+            <!-- Prévia das fotos escolhidas, preenchida pelo script no fim da página.
+                 Só aparece depois que o usuário escolhe pelo menos 1 arquivo. -->
+            <div id="previa-imagens-wrapper" style="display:none;" class="previa-imagens"></div>
         </div>
 
         <div class="input-container">
@@ -118,21 +148,84 @@
        </svg>
     </a>
 
-    <!-- Mostra uma prévia da imagem assim que o usuário escolhe o arquivo -->
+    <!-- Controla a seleção de fotos "na mão", porque o <input type="file">
+         sozinho SUBSTITUI a seleção toda vez que o seletor é reaberto —
+         por isso a foto anterior "sumia" ao escolher outra. Aqui a gente
+         guarda os arquivos numa lista própria (arquivosSelecionados) que
+         só é limpa quando o usuário remove algo, nunca sozinha. -->
     <script>
-        document.getElementById('input-imagem').addEventListener('change', function (evento) {
-            const arquivo = evento.target.files[0];
-            const previa = document.getElementById('previa-imagem');
-            const wrapper = document.getElementById('previa-imagem-wrapper');
+        const inputImagens = document.getElementById('input-imagens');
+        const wrapper = document.getElementById('previa-imagens-wrapper');
+        const LIMITE_FOTOS = 3;
 
-            if (arquivo) {
-                // createObjectURL cria um link temporário pro arquivo que está
-                // no computador do usuário, só pra exibir na tela.
-                previa.src = URL.createObjectURL(arquivo);
-                wrapper.style.display = 'block';
-            } else {
+        // Essa lista é a "fonte da verdade" das fotos escolhidas.
+        let arquivosSelecionados = [];
+
+        // Sempre que a lista muda, esta função:
+        // 1) reconstrói o input.files de verdade (senão o formulário
+        //    envia só o que o navegador tem, não o que está na tela)
+        // 2) redesenha as prévias com botão de remover em cada uma
+        function atualizarSelecao() {
+            // DataTransfer é o jeito de montar uma FileList "na mão" —
+            // não dá pra simplesmente fazer input.files = [...array].
+            const dt = new DataTransfer();
+            arquivosSelecionados.forEach(arquivo => dt.items.add(arquivo));
+            inputImagens.files = dt.files;
+
+            wrapper.innerHTML = '';
+
+            if (arquivosSelecionados.length === 0) {
                 wrapper.style.display = 'none';
+                return;
             }
+
+            arquivosSelecionados.forEach(function (arquivo, indice) {
+                const caixa = document.createElement('div');
+                caixa.style.cssText = 'position:relative; width:120px; height:120px;';
+
+                const img = document.createElement('img');
+                // createObjectURL cria um link temporário pro arquivo que
+                // está no computador do usuário, só pra exibir na tela.
+                img.src = URL.createObjectURL(arquivo);
+                img.alt = 'Prévia da imagem selecionada';
+                img.style.cssText = 'width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid #ddd;';
+
+                const btnRemover = document.createElement('button');
+                btnRemover.type = 'button'; // evita que isso submeta o formulário
+                btnRemover.innerText = '✕';
+                btnRemover.title = 'Remover esta foto';
+                btnRemover.style.cssText = 'position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; border:none; background:#222; color:#fff; cursor:pointer; font-size:12px; line-height:1;';
+                btnRemover.addEventListener('click', function () {
+                    arquivosSelecionados.splice(indice, 1);
+                    atualizarSelecao();
+                });
+
+                caixa.appendChild(img);
+                caixa.appendChild(btnRemover);
+                wrapper.appendChild(caixa);
+            });
+
+            wrapper.style.display = 'flex';
+        }
+
+        inputImagens.addEventListener('change', function (evento) {
+            const novosArquivos = Array.from(evento.target.files);
+            const espacoLivre = LIMITE_FOTOS - arquivosSelecionados.length;
+
+            if (novosArquivos.length > espacoLivre) {
+                alert(
+                    espacoLivre > 0
+                        ? `Você já tem ${arquivosSelecionados.length} foto(s). Só cabem mais ${espacoLivre}.`
+                        : 'Você já escolheu o máximo de 3 fotos. Remova alguma antes de adicionar outra.'
+                );
+            }
+
+            // Adiciona só o que couber até o limite, ignora o resto.
+            novosArquivos.slice(0, espacoLivre).forEach(function (arquivo) {
+                arquivosSelecionados.push(arquivo);
+            });
+
+            atualizarSelecao();
         });
     </script>
 

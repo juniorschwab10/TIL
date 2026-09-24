@@ -17,6 +17,16 @@
     --accent-brown: #a2763f;
     --bg-light: #f5f3ef;
     --text-dark: #171717;
+
+    /* Botões */
+    --btn-radius: 8px;
+    --btn-shadow: 0 2px 6px rgba(0, 0, 0, 0.10);
+    --btn-shadow-hover: 0 8px 18px rgba(0, 0, 0, 0.16);
+    --btn-transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 * {
@@ -25,8 +35,13 @@
     box-sizing: border-box;
 }
 
+::selection {
+    background: var(--accent-brown);
+    color: #fff;
+}
+
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Segoe UI", system-ui, -apple-system, Arial, Helvetica, sans-serif;
     background: #f5f3ef;
     color: #171717;
     min-height: 100vh;
@@ -104,7 +119,7 @@ nav {
 }
 
 nav a {
-    color: #ddd;
+    color: #000000e8;
     font-size: 14px;
     font-weight: 600;
     transition: 0.2s;
@@ -118,6 +133,58 @@ nav a:hover {
     display: flex;
     align-items: center;
     gap: 18px;
+}
+
+/* Botões dentro do header escuro: .secondary usava borda #171717 (a
+   MESMA cor do fundo do header) e texto herdado escuro — ficavam
+   invisíveis em cima do fundo escuro (ex.: "Entrar" na home, "Sair"
+   no perfil). .primary também "sumia" visualmente por ser quase da
+   mesma cor do header ao redor. */
+.header .secondary {
+    border-color: #fff;
+    color: #fff;
+}
+
+.header .secondary:hover {
+    background: #fff;
+    color: #171717;
+}
+
+.header .primary {
+    background: var(--accent-brown);
+}
+
+.header .primary:hover {
+    background: var(--r);
+}
+
+/* Link de destaque (usado em "Já tenho uma conta", "Esqueci minha senha"
+   e "limpar os filtros"): não existia no CSS, então ficava com a cor
+   padrão do texto — invisível sobre fundo escuro. */
+.link-accent {
+    color: var(--accent-brown);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.15s ease;
+}
+
+.link-accent:hover {
+    color: var(--r);
+}
+
+.header .link-accent {
+    color: var(--accent-gold);
+}
+
+.header .link-accent:hover {
+    color: #fff;
+}
+
+/* Utilitário usado em vários botões (Entrar, Criar conta, Limpar
+   filtros) que também não existia no CSS. */
+.full-width {
+    width: 100%;
 }
 
 .eyebrow {
@@ -168,37 +235,107 @@ textarea:focus {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     border: none;
-    border-radius: 6px;
-    padding: 14px 22px;
+    border-radius: var(--btn-radius);
+    padding: 15px 26px;
+    min-height: 48px;
+    font-size: 15px;
     background: #171717;
     color: #fff;
     font-weight: 700;
     cursor: pointer;
-    transition: 0.2s;
+    box-shadow: var(--btn-shadow);
+    transition: var(--btn-transition);
     white-space: nowrap;
 }
 
 .primary:hover,
 .button:hover {
     background: #a2763f;
+    transform: translateY(-2px);
+    box-shadow: var(--btn-shadow-hover);
+}
+
+.primary:active,
+.button:active {
+    transform: translateY(0);
+    box-shadow: var(--btn-shadow);
+}
+
+.primary:focus-visible,
+.button:focus-visible,
+.secondary:focus-visible {
+    outline: 3px solid rgba(162, 118, 63, 0.45);
+    outline-offset: 2px;
+}
+
+.primary:disabled,
+.button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Botão em estado de carregamento: adicione a classe "loading" via JS
+   (ex.: form.querySelector('button').classList.add('loading')) */
+.button.loading,
+.primary.loading {
+    color: transparent;
+    pointer-events: none;
+    position: relative;
+}
+
+.button.loading::after,
+.primary.loading::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 14px 20px;
-    border: 1px solid #171717;
-    border-radius: 6px;
+    gap: 8px;
+    padding: 15px 24px;
+    min-height: 48px;
+    font-size: 15px;
+    border: 2px solid #171717;
+    border-radius: var(--btn-radius);
     font-weight: 700;
     cursor: pointer;
-    transition: 0.2s;
+    background: transparent;
+    transition: var(--btn-transition);
 }
 
 .secondary:hover {
     background: #171717;
     color: #fff;
+    transform: translateY(-2px);
+    box-shadow: var(--btn-shadow-hover);
+}
+
+.secondary:active {
+    transform: translateY(0);
+}
+
+.secondary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .panel {
@@ -228,6 +365,31 @@ textarea:focus {
     grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: 70px;
+}
+
+/* A página inteira de login/cadastro é escura por design (logo branco,
+   textos claros). Em vez de depender de uma classe no <body> que nunca
+   é aplicada no HTML, ativamos o tema escuro automaticamente sempre que
+   a página contém .auth ou .register-page. */
+body:has(.auth),
+body:has(.register-page) {
+    background: var(--bg);
+    color: #eee;
+}
+
+body:has(.auth) .muted,
+body:has(.register-page) .muted {
+    color: #aaa;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.authbox {
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
 }
 
 .authbox {
@@ -264,19 +426,48 @@ textarea:focus {
 
 .authbox button,
 .register-page button.primary {
-    min-height: 45px;
+    min-height: 50px;
+    padding: 0 22px;
+    font-size: 15px;
     border: 0;
-    border-radius: 4px;
+    border-radius: var(--btn-radius);
     background: var(--r);
     color: #fff;
     font-weight: 800;
     cursor: pointer;
+    box-shadow: 0 4px 14px rgba(198, 40, 40, 0.35);
+    transition: var(--btn-transition);
+}
+
+.authbox button:hover,
+.register-page button.primary:hover {
+    background: #e53935;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(198, 40, 40, 0.4);
+}
+
+.authbox button:active,
+.register-page button.primary:active {
+    transform: translateY(0);
+}
+
+.authbox button:disabled,
+.register-page button.primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .back {
     display: inline-block;
     margin-bottom: 25px;
-    color: #aaa;
+    color: var(--accent-brown);
+    font-weight: 600;
+    transition: color 0.15s ease;
+}
+
+.back:hover {
+    color: var(--r);
 }
 
 .register {
@@ -322,6 +513,15 @@ textarea:focus {
     min-height: auto;
 }
 
+/* Os botões "Salvar veículo" / "Cancelar" usam a classe genérica .row,
+   que foi pensada para pares como "lembrar de mim" / "esqueci a senha"
+   (um em cada ponta). Para botões, isso os jogava pra extremidades
+   opostas do formulário — aqui eles ficam agrupados, lado a lado. */
+#form-veiculo .row {
+    justify-content: flex-start;
+    gap: 12px;
+}
+
 /* ==========================================================================
    4. HOME / HERO PAGE (index.html)
    ========================================================================== */
@@ -330,6 +530,7 @@ textarea:focus {
     min-height: 560px;
     display: flex;
     align-items: center;
+    background: radial-gradient(1100px 480px at 82% 15%, rgba(198, 40, 40, 0.05), transparent 60%);
 }
 
 .hero section {
@@ -422,13 +623,24 @@ textarea:focus {
     border: none;
     background: #171717;
     color: #fff;
-    padding: 0 22px;
-    border-radius: 6px;
+    padding: 0 26px;
+    min-height: 48px;
+    font-size: 15px;
+    border-radius: var(--btn-radius);
     font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--btn-shadow);
+    transition: var(--btn-transition);
 }
 
 .search button:hover {
     background: #a2763f;
+    transform: translateY(-2px);
+    box-shadow: var(--btn-shadow-hover);
+}
+
+.search button:active {
+    transform: translateY(0);
 }
 
 .content {
@@ -733,6 +945,7 @@ aside input {
 
 .vehiclephoto {
     width: 40%;
+    height: 220px;
     min-height: 220px;
     background-color: #222;
     color: #d6a84f;
@@ -797,29 +1010,42 @@ aside input {
 
 .alerts article button {
     background: transparent;
-    border: 1px solid #bbb;
-    border-radius: 5px;
-    padding: 10px 15px;
+    border: 2px solid #bbb;
+    border-radius: var(--btn-radius);
+    padding: 10px 18px;
+    min-height: 40px;
+    font-weight: 700;
     color: #555;
+    cursor: pointer;
+    transition: var(--btn-transition);
 }
 
 .alerts article button:hover {
     border-color: #171717;
-    color: #171717;
+    background: #171717;
+    color: #fff;
+    transform: translateY(-2px);
 }
 
 .create {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin-top: 20px;
-    padding: 13px 18px;
-    border-radius: 6px;
+    padding: 14px 22px;
+    min-height: 46px;
+    border-radius: var(--btn-radius);
     background: #171717;
     color: #fff;
     font-weight: 700;
+    box-shadow: var(--btn-shadow);
+    transition: var(--btn-transition);
 }
 
 .create:hover {
     background: #a2763f;
+    transform: translateY(-2px);
+    box-shadow: var(--btn-shadow-hover);
 }
 
 /* ==========================================================================
@@ -965,15 +1191,20 @@ aside input {
 
 .composer button {
     border: none;
-    border-radius: 6px;
-    padding: 0 24px;
+    border-radius: var(--btn-radius);
+    padding: 0 26px;
+    min-height: 48px;
+    font-weight: 700;
     background: #171717;
     color: #fff;
-    font-weight: 700;
+    cursor: pointer;
+    transition: var(--btn-transition);
 }
 
 .composer button:hover {
     background: #a2763f;
+    transform: translateY(-2px);
+    box-shadow: var(--btn-shadow-hover);
 }
 
 /* ==========================================================================
@@ -1011,17 +1242,22 @@ aside input {
 }
 
 .profilehead button {
-    border: 1px solid #171717;
+    border: 2px solid #171717;
     background: transparent;
-    padding: 12px 18px;
-    border-radius: 6px;
+    padding: 13px 22px;
+    min-height: 46px;
+    font-size: 14px;
+    border-radius: var(--btn-radius);
     font-weight: 700;
     cursor: pointer;
+    transition: var(--btn-transition);
 }
 
 .profilehead button:hover {
     background: #171717;
     color: #fff;
+    transform: translateY(-2px);
+    box-shadow: var(--btn-shadow-hover);
 }
 
 .profilegrid {
@@ -1131,7 +1367,23 @@ aside input {
 
 .formulario button {
     margin-top: 8px;
-    border-color: #fff;
+    min-height: 48px;
+    padding: 0 22px;
+    font-size: 15px;
+    border-radius: var(--btn-radius);
+    border: 2px solid #fff;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--btn-transition);
+}
+
+.formulario button:hover {
+    background: #fff;
+    color: #171717;
+    transform: translateY(-2px);
+    box-shadow: var(--btn-shadow-hover);
 }
 
 .input-container {
@@ -1226,15 +1478,19 @@ body.pagina-admin {
     background: transparent;
     border: 2px solid #e58a8a;
     color: #ffd9d9;
-    padding: 6px 16px;
-    border-radius: 8px;
+    padding: 9px 20px;
+    min-height: 38px;
+    border-radius: var(--btn-radius);
     cursor: pointer;
+    font-weight: 700;
     font-size: 0.85rem;
-    transition: background-color 0.2s ease;
+    transition: var(--btn-transition);
 }
 
 .btn-excluir:hover {
-    background: rgba(229, 138, 138, 0.2);
+    background: #e58a8a;
+    color: #171717;
+    transform: translateY(-2px);
 }
 
 .ficha {
@@ -1432,6 +1688,7 @@ body.pagina-admin {
 
     .vehiclephoto {
         width: 100%;
+        height: 150px;
         min-height: 150px;
     }
 
@@ -1463,17 +1720,20 @@ body.pagina-admin {
 }
 
 .button.sm {
-    padding: 8px 14px;
+    padding: 9px 16px;
+    min-height: 36px;
     font-size: 13px;
 }
 
 .button.danger {
     background: #dc3545;
     color: #fff;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.25);
 }
 
 .button.danger:hover {
     background: #bd2130;
+    box-shadow: 0 8px 18px rgba(220, 53, 69, 0.35);
 }
 
 .main-adm {
@@ -1727,4 +1987,20 @@ body.alto-contraste h1,
 body.alto-contraste h2, 
 body.alto-contraste h3 {
     color: #ffff00 !important;
+}
+/* ==========================================================================
+   15. PRÉVIA DE FOTOS (publicar-anuncio.html / editar-anuncio.html)
+   ========================================================================== */
+
+.previa-imagens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+/* Esconde qualquer elemento marcado com a classe "oculto"
+   (ex.: o formulário de veículo na garagem) */
+.oculto {
+    display: none;
 }
