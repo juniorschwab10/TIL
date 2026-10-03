@@ -3,9 +3,11 @@
    Combined from all project CSS files
    ========================================================================== */
 
+
 /* ==========================================================================
    1. GLOBAL VARIABLES & RESET
    ========================================================================== */
+
 
 :root {
     --r: #c62828;
@@ -17,17 +19,8 @@
     --accent-brown: #a2763f;
     --bg-light: #f5f3ef;
     --text-dark: #171717;
-
-    /* Botões */
-    --btn-radius: 8px;
-    --btn-shadow: 0 2px 6px rgba(0, 0, 0, 0.10);
-    --btn-shadow-hover: 0 8px 18px rgba(0, 0, 0, 0.16);
-    --btn-transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
-html {
-    scroll-behavior: smooth;
-}
 
 * {
     margin: 0;
@@ -35,17 +28,14 @@ html {
     box-sizing: border-box;
 }
 
-::selection {
-    background: var(--accent-brown);
-    color: #fff;
-}
 
 body {
-    font-family: "Segoe UI", system-ui, -apple-system, Arial, Helvetica, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     background: #f5f3ef;
     color: #171717;
     min-height: 100vh;
 }
+
 
 /* Dark layout overrides (for Auth and Hero pages using var(--bg)) */
 body.dark-theme,
@@ -54,10 +44,12 @@ body.auth-body {
     color: #eee;
 }
 
+
 a {
     text-decoration: none;
     color: inherit;
 }
+
 
 button,
 input,
@@ -66,13 +58,16 @@ textarea {
     font: inherit;
 }
 
+
 button {
     cursor: pointer;
 }
 
+
 /* ==========================================================================
    2. COMMON LAYOUT & NAVIGATION (HEADER, WRAP, LOGO, FOOTER)
    ========================================================================== */
+
 
 .wrap {
     max-width: 1200px;
@@ -80,10 +75,12 @@ button {
     padding: 0 24px;
 }
 
+
 .header {
     background: #171717;
     border-bottom: 1px solid #2b2b2b;
 }
+
 
 .header .wrap {
     max-width: 1200px;
@@ -95,6 +92,7 @@ button {
     justify-content: space-between;
 }
 
+
 .logo {
     color: #fff;
     font-size: 22px;
@@ -102,9 +100,11 @@ button {
     letter-spacing: 2px;
 }
 
+
 .logo span {
     color: #c99a55;
 }
+
 
 .logo span.sublogo {
     display: block;
@@ -113,21 +113,25 @@ button {
     letter-spacing: 4px;
 }
 
+
 nav {
     display: flex;
     gap: 28px;
 }
 
+
 nav a {
-    color: #000000e8;
+    color: #ddd;
     font-size: 14px;
     font-weight: 600;
     transition: 0.2s;
 }
 
+
 nav a:hover {
     color: #c99a55;
 }
+
 
 .actions {
     display: flex;
@@ -135,57 +139,6 @@ nav a:hover {
     gap: 18px;
 }
 
-/* Botões dentro do header escuro: .secondary usava borda #171717 (a
-   MESMA cor do fundo do header) e texto herdado escuro — ficavam
-   invisíveis em cima do fundo escuro (ex.: "Entrar" na home, "Sair"
-   no perfil). .primary também "sumia" visualmente por ser quase da
-   mesma cor do header ao redor. */
-.header .secondary {
-    border-color: #fff;
-    color: #fff;
-}
-
-.header .secondary:hover {
-    background: #fff;
-    color: #171717;
-}
-
-.header .primary {
-    background: var(--accent-brown);
-}
-
-.header .primary:hover {
-    background: var(--r);
-}
-
-/* Link de destaque (usado em "Já tenho uma conta", "Esqueci minha senha"
-   e "limpar os filtros"): não existia no CSS, então ficava com a cor
-   padrão do texto — invisível sobre fundo escuro. */
-.link-accent {
-    color: var(--accent-brown);
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    transition: color 0.15s ease;
-}
-
-.link-accent:hover {
-    color: var(--r);
-}
-
-.header .link-accent {
-    color: var(--accent-gold);
-}
-
-.header .link-accent:hover {
-    color: #fff;
-}
-
-/* Utilitário usado em vários botões (Entrar, Criar conta, Limpar
-   filtros) que também não existia no CSS. */
-.full-width {
-    width: 100%;
-}
 
 .eyebrow {
     color: #a2763f;
@@ -195,20 +148,24 @@ nav a:hover {
     margin-bottom: 10px;
 }
 
+
 .muted {
     color: #777;
     line-height: 1.6;
 }
 
+
 .heading {
     padding: 55px 0 30px;
 }
+
 
 h1 {
     font-size: 42px;
     line-height: 1.1;
     margin-bottom: 12px;
 }
+
 
 /* Common Form Components & Inputs */
 input,
@@ -223,6 +180,7 @@ textarea {
     transition: 0.2s;
 }
 
+
 input:focus,
 select:focus,
 textarea:focus {
@@ -230,113 +188,48 @@ textarea:focus {
     box-shadow: 0 0 0 3px rgba(162, 118, 63, 0.10);
 }
 
+
 .primary,
 .button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     border: none;
-    border-radius: var(--btn-radius);
-    padding: 15px 26px;
-    min-height: 48px;
-    font-size: 15px;
+    border-radius: 6px;
+    padding: 14px 22px;
     background: #171717;
     color: #fff;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: var(--btn-shadow);
-    transition: var(--btn-transition);
+    transition: 0.2s;
     white-space: nowrap;
 }
+
 
 .primary:hover,
 .button:hover {
     background: #a2763f;
-    transform: translateY(-2px);
-    box-shadow: var(--btn-shadow-hover);
 }
 
-.primary:active,
-.button:active {
-    transform: translateY(0);
-    box-shadow: var(--btn-shadow);
-}
-
-.primary:focus-visible,
-.button:focus-visible,
-.secondary:focus-visible {
-    outline: 3px solid rgba(162, 118, 63, 0.45);
-    outline-offset: 2px;
-}
-
-.primary:disabled,
-.button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-/* Botão em estado de carregamento: adicione a classe "loading" via JS
-   (ex.: form.querySelector('button').classList.add('loading')) */
-.button.loading,
-.primary.loading {
-    color: transparent;
-    pointer-events: none;
-    position: relative;
-}
-
-.button.loading::after,
-.primary.loading::after {
-    content: "";
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: btn-spin 0.7s linear infinite;
-}
-
-@keyframes btn-spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
 
 .secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 15px 24px;
-    min-height: 48px;
-    font-size: 15px;
-    border: 2px solid #171717;
-    border-radius: var(--btn-radius);
+    padding: 14px 20px;
+    border: 1px solid #171717;
+    border-radius: 6px;
     font-weight: 700;
     cursor: pointer;
-    background: transparent;
-    transition: var(--btn-transition);
+    transition: 0.2s;
 }
+
 
 .secondary:hover {
     background: #171717;
     color: #fff;
-    transform: translateY(-2px);
-    box-shadow: var(--btn-shadow-hover);
 }
 
-.secondary:active {
-    transform: translateY(0);
-}
-
-.secondary:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    transform: none;
-}
 
 .panel {
     background: #fff;
@@ -346,15 +239,18 @@ textarea:focus {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
 }
 
+
 .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
 }
 
+
 /* ==========================================================================
    3. AUTH & REGISTER PAGES (login.html, cadastro.html)
    ========================================================================== */
+
 
 .auth,
 .register-page {
@@ -367,30 +263,6 @@ textarea:focus {
     gap: 70px;
 }
 
-/* A página inteira de login/cadastro é escura por design (logo branco,
-   textos claros). Em vez de depender de uma classe no <body> que nunca
-   é aplicada no HTML, ativamos o tema escuro automaticamente sempre que
-   a página contém .auth ou .register-page. */
-body:has(.auth),
-body:has(.register-page) {
-    background: var(--bg);
-    color: #eee;
-}
-
-body:has(.auth) .muted,
-body:has(.register-page) .muted {
-    color: #aaa;
-}
-
-.brand {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-}
-
-.authbox {
-    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
-}
 
 .authbox {
     background: var(--card);
@@ -399,6 +271,7 @@ body:has(.register-page) .muted {
     border-radius: 6px;
 }
 
+
 .authbox form,
 .register-page form {
     display: grid;
@@ -406,12 +279,14 @@ body:has(.register-page) .muted {
     margin-top: 25px;
 }
 
+
 .authbox label,
 .register-page label {
     font-size: 13px;
     font-weight: 700;
     margin-top: 8px;
 }
+
 
 .authbox input,
 .register-page input {
@@ -424,51 +299,25 @@ body:has(.register-page) .muted {
     border-radius: 4px;
 }
 
+
 .authbox button,
 .register-page button.primary {
-    min-height: 50px;
-    padding: 0 22px;
-    font-size: 15px;
+    min-height: 45px;
     border: 0;
-    border-radius: var(--btn-radius);
+    border-radius: 4px;
     background: var(--r);
     color: #fff;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(198, 40, 40, 0.35);
-    transition: var(--btn-transition);
 }
 
-.authbox button:hover,
-.register-page button.primary:hover {
-    background: #e53935;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 22px rgba(198, 40, 40, 0.4);
-}
-
-.authbox button:active,
-.register-page button.primary:active {
-    transform: translateY(0);
-}
-
-.authbox button:disabled,
-.register-page button.primary:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    transform: none;
-}
 
 .back {
     display: inline-block;
     margin-bottom: 25px;
-    color: var(--accent-brown);
-    font-weight: 600;
-    transition: color 0.15s ease;
+    color: #aaa;
 }
 
-.back:hover {
-    color: var(--r);
-}
 
 .register {
     margin-top: 22px;
@@ -476,10 +325,12 @@ body:has(.register-page) .muted {
     font-size: 13px;
 }
 
+
 .register a,
 .authbox a:not(.back) {
     color: #fff;
 }
+
 
 .terms {
     display: flex;
@@ -487,10 +338,12 @@ body:has(.register-page) .muted {
     gap: 8px;
 }
 
+
 .terms input {
     width: auto;
     min-height: auto;
 }
+
 
 .row {
     display: flex;
@@ -500,6 +353,7 @@ body:has(.register-page) .muted {
     font-size: 12px;
 }
 
+
 .row label {
     display: flex;
     align-items: center;
@@ -508,34 +362,29 @@ body:has(.register-page) .muted {
     font-weight: normal;
 }
 
+
 .row input {
     width: auto;
     min-height: auto;
 }
 
-/* Os botões "Salvar veículo" / "Cancelar" usam a classe genérica .row,
-   que foi pensada para pares como "lembrar de mim" / "esqueci a senha"
-   (um em cada ponta). Para botões, isso os jogava pra extremidades
-   opostas do formulário — aqui eles ficam agrupados, lado a lado. */
-#form-veiculo .row {
-    justify-content: flex-start;
-    gap: 12px;
-}
 
 /* ==========================================================================
    4. HOME / HERO PAGE (index.html)
    ========================================================================== */
 
+
 .hero {
     min-height: 560px;
     display: flex;
     align-items: center;
-    background: radial-gradient(1100px 480px at 82% 15%, rgba(198, 40, 40, 0.05), transparent 60%);
 }
+
 
 .hero section {
     max-width: 720px;
 }
+
 
 .hero h1 {
     font-size: clamp(48px, 8vw, 86px);
@@ -544,9 +393,11 @@ body:has(.register-page) .muted {
     margin: 12px 0 24px;
 }
 
+
 .hero h1 span {
     color: var(--r);
 }
+
 
 /* Espaçamento da seção principal (Hero) */
 .hero {
@@ -554,15 +405,18 @@ body:has(.register-page) .muted {
     margin-bottom: 10px !important;
 }
 
+
 /* Espaçamento e layout da seção de anúncios recentes */
 .home-featured {
     margin-top: 15px !important;
     padding-top: 0 !important;
 }
 
+
 .home-featured h2 {
     margin-bottom: 20px;
 }
+
 
 /* Grid/Flex dos cards para ficarem lado a lado e organizados */
 .vehicles {
@@ -572,11 +426,13 @@ body:has(.register-page) .muted {
     margin-top: 15px;
 }
 
+
 .buttons {
     display: flex;
     gap: 12px;
     margin-top: 30px;
 }
+
 
 .home-cards {
     display: grid;
@@ -585,6 +441,7 @@ body:has(.register-page) .muted {
     padding-bottom: 60px;
 }
 
+
 .home-cards .card {
     background: var(--card);
     border: 1px solid var(--bd);
@@ -592,13 +449,16 @@ body:has(.register-page) .muted {
     min-height: 170px;
 }
 
+
 .home-cards .card h2 {
     margin: 10px 0;
 }
 
+
 /* ==========================================================================
    5. MARKETPLACE / ANÚNCIOS LIST (anuncios.html)
    ========================================================================== */
+
 
 .top {
     padding: 50px 0 30px;
@@ -607,6 +467,7 @@ body:has(.register-page) .muted {
     justify-content: space-between;
     gap: 30px;
 }
+
 
 .search {
     background: #fff;
@@ -619,29 +480,21 @@ body:has(.register-page) .muted {
     margin-bottom: 30px;
 }
 
+
 .search button {
     border: none;
     background: #171717;
     color: #fff;
-    padding: 0 26px;
-    min-height: 48px;
-    font-size: 15px;
-    border-radius: var(--btn-radius);
+    padding: 0 22px;
+    border-radius: 6px;
     font-weight: 700;
-    cursor: pointer;
-    box-shadow: var(--btn-shadow);
-    transition: var(--btn-transition);
 }
+
 
 .search button:hover {
     background: #a2763f;
-    transform: translateY(-2px);
-    box-shadow: var(--btn-shadow-hover);
 }
 
-.search button:active {
-    transform: translateY(0);
-}
 
 .content {
     display: grid;
@@ -649,6 +502,7 @@ body:has(.register-page) .muted {
     gap: 30px;
     padding-bottom: 70px;
 }
+
 
 aside {
     background: #fff;
@@ -658,9 +512,11 @@ aside {
     height: fit-content;
 }
 
+
 aside h3 {
     margin-bottom: 22px;
 }
+
 
 aside label {
     display: block;
@@ -670,14 +526,17 @@ aside label {
     color: #555;
 }
 
+
 aside p {
     color: #666;
     margin: 8px 0;
 }
 
+
 aside input {
     width: 100%;
 }
+
 
 .resulthead {
     display: flex;
@@ -686,15 +545,18 @@ aside input {
     margin-bottom: 18px;
 }
 
+
 .resulthead select {
     padding: 9px 12px;
 }
+
 
 .cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 18px;
 }
+
 
 .card {
     background: #fff;
@@ -704,10 +566,12 @@ aside input {
     transition: 0.2s;
 }
 
+
 .card:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
+
 
 .photo {
     height: 180px;
@@ -721,9 +585,11 @@ aside input {
     letter-spacing: 3px;
 }
 
+
 .info {
     padding: 20px;
 }
+
 
 .info > span {
     color: #a2763f;
@@ -732,11 +598,13 @@ aside input {
     text-transform: uppercase;
 }
 
+
 .info h2 {
     font-size: 18px;
     line-height: 1.3;
     margin: 9px 0;
 }
+
 
 .info p {
     color: #777;
@@ -745,11 +613,13 @@ aside input {
     margin-bottom: 18px;
 }
 
+
 .info strong {
     display: block;
     font-size: 21px;
     margin-bottom: 16px;
 }
+
 
 .info a {
     color: #a2763f;
@@ -757,9 +627,11 @@ aside input {
     font-weight: 700;
 }
 
+
 /* ==========================================================================
    6. ANÚNCIO DETALHES (anuncio.html)
    ========================================================================== */
+
 
 .back-link {
     display: inline-block;
@@ -768,9 +640,11 @@ aside input {
     font-size: 14px;
 }
 
+
 .back-link:hover {
     color: #a2763f;
 }
+
 
 .detail {
     display: grid;
@@ -778,6 +652,7 @@ aside input {
     gap: 45px;
     padding-bottom: 70px;
 }
+
 
 .mainphoto {
     height: 480px;
@@ -792,11 +667,13 @@ aside input {
     letter-spacing: 4px;
 }
 
+
 .thumbs {
     display: flex;
     gap: 12px;
     margin-top: 14px;
 }
+
 
 .thumbs i {
     width: 75px;
@@ -812,9 +689,11 @@ aside input {
     cursor: pointer;
 }
 
+
 .data {
     padding-top: 15px;
 }
+
 
 .tag {
     display: inline-block;
@@ -827,17 +706,20 @@ aside input {
     letter-spacing: 1px;
 }
 
+
 .data h1 {
     font-size: 39px;
     line-height: 1.12;
     margin: 18px 0 15px;
 }
 
+
 .price {
     font-size: 34px;
     font-weight: 900;
     margin: 25px 0;
 }
+
 
 .specs {
     display: grid;
@@ -846,12 +728,14 @@ aside input {
     margin: 28px 0;
 }
 
+
 .specs div {
     background: #fff;
     border: 1px solid #ddd8d0;
     border-radius: 7px;
     padding: 15px;
 }
+
 
 .specs small {
     display: block;
@@ -860,9 +744,11 @@ aside input {
     margin-bottom: 7px;
 }
 
+
 .specs b {
     font-size: 14px;
 }
+
 
 .seller {
     margin-top: 30px;
@@ -872,6 +758,7 @@ aside input {
     align-items: center;
     gap: 14px;
 }
+
 
 .avatar {
     width: 48px;
@@ -885,16 +772,19 @@ aside input {
     font-weight: 800;
 }
 
+
 .seller small,
 .seller b,
 .seller span {
     display: block;
 }
 
+
 .seller small {
     color: #888;
     margin-bottom: 3px;
 }
+
 
 .seller span {
     color: #777;
@@ -902,9 +792,11 @@ aside input {
     margin-top: 3px;
 }
 
+
 /* ==========================================================================
    7. PUBLICAR ANÚNCIO (publicar-anuncio.html)
    ========================================================================== */
+
 
 .publish {
     display: grid;
@@ -913,20 +805,24 @@ aside input {
     padding-bottom: 60px;
 }
 
+
 .publish textarea {
     resize: vertical;
     min-height: 150px;
 }
 
+
 /* ==========================================================================
    8. MEUS VEÍCULOS (veiculos.html)
    ========================================================================== */
+
 
 .vehicles {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 25px;
 }
+
 
 .vehicle {
     background-color: #ffffff;
@@ -938,10 +834,12 @@ aside input {
     transition: 0.2s;
 }
 
+
 .vehicle:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
+
 
 .vehiclephoto {
     width: 40%;
@@ -957,15 +855,18 @@ aside input {
     letter-spacing: 2px;
 }
 
+
 /* ==========================================================================
    9. ALERTAS (alertas.html)
    ========================================================================== */
+
 
 .alerts {
     display: grid;
     gap: 14px;
     max-width: 900px;
 }
+
 
 .alerts article {
     background: #fff;
@@ -977,6 +878,7 @@ aside input {
     align-items: center;
     gap: 18px;
 }
+
 
 .alerts .icon {
     width: 48px;
@@ -991,6 +893,7 @@ aside input {
     font-weight: 900;
 }
 
+
 .alerts article span {
     color: #a2763f;
     font-size: 10px;
@@ -998,59 +901,54 @@ aside input {
     letter-spacing: 1px;
 }
 
+
 .alerts article h2 {
     font-size: 20px;
     margin: 6px 0;
 }
+
 
 .alerts article p {
     color: #777;
     font-size: 14px;
 }
 
+
 .alerts article button {
     background: transparent;
-    border: 2px solid #bbb;
-    border-radius: var(--btn-radius);
-    padding: 10px 18px;
-    min-height: 40px;
-    font-weight: 700;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    padding: 10px 15px;
     color: #555;
-    cursor: pointer;
-    transition: var(--btn-transition);
 }
+
 
 .alerts article button:hover {
     border-color: #171717;
-    background: #171717;
-    color: #fff;
-    transform: translateY(-2px);
+    color: #171717;
 }
 
+
 .create {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
     margin-top: 20px;
-    padding: 14px 22px;
-    min-height: 46px;
-    border-radius: var(--btn-radius);
+    padding: 13px 18px;
+    border-radius: 6px;
     background: #171717;
     color: #fff;
     font-weight: 700;
-    box-shadow: var(--btn-shadow);
-    transition: var(--btn-transition);
 }
+
 
 .create:hover {
     background: #a2763f;
-    transform: translateY(-2px);
-    box-shadow: var(--btn-shadow-hover);
 }
+
 
 /* ==========================================================================
    10. CHAT / NEGOCIAÇÃO (chat.html)
    ========================================================================== */
+
 
 .chat-container {
     max-width: 1250px;
@@ -1058,6 +956,7 @@ aside input {
     margin: auto;
     padding: 25px;
 }
+
 
 .chatpage {
     height: calc(100vh - 50px);
@@ -1069,17 +968,20 @@ aside input {
     grid-template-columns: 310px 1fr;
 }
 
+
 .chatpage aside {
     border-right: 1px solid #ddd8d0;
     background: #faf9f7;
     padding: 0;
 }
 
+
 .chatpage aside h2 {
     padding: 25px;
     border-bottom: 1px solid #ddd8d0;
     font-size: 20px;
 }
+
 
 .conversation {
     padding: 18px 20px;
@@ -1090,31 +992,37 @@ aside input {
     cursor: pointer;
 }
 
+
 .conversation:hover,
 .conversation.active {
     background: #eeeae4;
 }
+
 
 .conversation b,
 .conversation span {
     display: block;
 }
 
+
 .conversation b {
     font-size: 14px;
     margin-bottom: 5px;
 }
+
 
 .conversation span {
     color: #888;
     font-size: 12px;
 }
 
+
 .chat {
     display: flex;
     flex-direction: column;
     min-width: 0;
 }
+
 
 .chathead {
     padding: 18px 24px;
@@ -1124,19 +1032,23 @@ aside input {
     gap: 13px;
 }
 
+
 .chathead b,
 .chathead span {
     display: block;
 }
 
+
 .chathead b {
     margin-bottom: 4px;
 }
+
 
 .chathead span {
     color: #888;
     font-size: 12px;
 }
+
 
 .messages {
     flex: 1;
@@ -1147,6 +1059,7 @@ aside input {
     gap: 14px;
 }
 
+
 .messages p {
     max-width: 65%;
     padding: 13px 16px;
@@ -1156,6 +1069,7 @@ aside input {
     position: relative;
 }
 
+
 .messages small {
     display: block;
     margin-top: 5px;
@@ -1163,10 +1077,12 @@ aside input {
     opacity: 0.6;
 }
 
+
 .received {
     align-self: flex-start;
     background: #eeeae4;
 }
+
 
 .sent {
     align-self: flex-end;
@@ -1174,12 +1090,14 @@ aside input {
     color: #fff;
 }
 
+
 .composer {
     padding: 18px;
     border-top: 1px solid #ddd8d0;
     display: flex;
     gap: 10px;
 }
+
 
 .composer input {
     flex: 1;
@@ -1189,27 +1107,26 @@ aside input {
     outline: none;
 }
 
+
 .composer button {
     border: none;
-    border-radius: var(--btn-radius);
-    padding: 0 26px;
-    min-height: 48px;
-    font-weight: 700;
+    border-radius: 6px;
+    padding: 0 24px;
     background: #171717;
     color: #fff;
-    cursor: pointer;
-    transition: var(--btn-transition);
+    font-weight: 700;
 }
+
 
 .composer button:hover {
     background: #a2763f;
-    transform: translateY(-2px);
-    box-shadow: var(--btn-shadow-hover);
 }
+
 
 /* ==========================================================================
    11. MEU PERFIL (perfil.html)
    ========================================================================== */
+
 
 .profilehead {
     margin: 50px 0 30px;
@@ -1222,6 +1139,7 @@ aside input {
     align-items: center;
     gap: 20px;
 }
+
 
 .avatar.big {
     width: 80px;
@@ -1236,29 +1154,28 @@ aside input {
     font-weight: 900;
 }
 
+
 .profilehead h1 {
     font-size: 32px;
     margin-bottom: 8px;
 }
 
+
 .profilehead button {
-    border: 2px solid #171717;
+    border: 1px solid #171717;
     background: transparent;
-    padding: 13px 22px;
-    min-height: 46px;
-    font-size: 14px;
-    border-radius: var(--btn-radius);
+    padding: 12px 18px;
+    border-radius: 6px;
     font-weight: 700;
     cursor: pointer;
-    transition: var(--btn-transition);
 }
+
 
 .profilehead button:hover {
     background: #171717;
     color: #fff;
-    transform: translateY(-2px);
-    box-shadow: var(--btn-shadow-hover);
 }
+
 
 .profilegrid {
     display: grid;
@@ -1267,20 +1184,24 @@ aside input {
     padding-bottom: 70px;
 }
 
+
 .stats {
     display: flex;
     flex-direction: column;
     gap: 0;
 }
 
+
 .stats > div {
     padding: 20px 0;
     border-bottom: 1px solid #eee;
 }
 
+
 .stats > div:last-child {
     border-bottom: none;
 }
+
 
 .stats b {
     display: block;
@@ -1288,14 +1209,17 @@ aside input {
     margin-bottom: 5px;
 }
 
+
 .stats span {
     color: #777;
     font-size: 13px;
 }
 
+
 /* ==========================================================================
    12. BACKEND / GLASSMORPHISM / ADMIN SYSTEM (style.css)
    ========================================================================== */
+
 
 /* Navbar GLASS */
 .navbar {
@@ -1305,6 +1229,7 @@ aside input {
     justify-content: space-between;
     align-items: center;
 }
+
 
 .conteudo {
     flex: 1;
@@ -1316,20 +1241,24 @@ aside input {
     padding: 40px 20px;
 }
 
+
 .conteudo h2 {
     margin-bottom: 12px;
 }
+
 
 .conteudo > p {
     margin-bottom: 20px;
     max-width: 480px;
 }
 
+
 .rodape {
     background-color: rgba(0, 0, 0, 0.25);
     padding: 18px;
     text-align: center;
 }
+
 
 /* Formulário Glassmorphism */
 .formulario {
@@ -1345,10 +1274,12 @@ aside input {
     text-align: left;
 }
 
+
 .formulario label {
     font-size: 0.85rem;
     color: #f1f4f8;
 }
+
 
 .formulario input {
     width: 100%;
@@ -1361,39 +1292,28 @@ aside input {
     outline: none;
 }
 
+
 .formulario input::placeholder {
     color: #dfe3e8;
 }
 
+
 .formulario button {
     margin-top: 8px;
-    min-height: 48px;
-    padding: 0 22px;
-    font-size: 15px;
-    border-radius: var(--btn-radius);
-    border: 2px solid #fff;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--btn-transition);
+    border-color: #fff;
 }
 
-.formulario button:hover {
-    background: #fff;
-    color: #171717;
-    transform: translateY(-2px);
-    box-shadow: var(--btn-shadow-hover);
-}
 
 .input-container {
     position: relative;
     width: 100%;
 }
 
+
 .input-container input {
     padding-right: 45px;
 }
+
 
 /* Só o filho DIRETO (ex.: um ícone de "mostrar senha" logo dentro do
    container) fica posicionado no canto do campo. Imagens aninhadas mais
@@ -1405,6 +1325,7 @@ aside input {
     top: 12px;
 }
 
+
 .input-container a {
     display: block;
     margin-top: 6px;
@@ -1412,10 +1333,12 @@ aside input {
     color: #dfe3e8;
 }
 
+
 body.pagina-admin {
     display: block;
     padding: 50px 20px;
 }
+
 
 .painel {
     max-width: 900px;
@@ -1427,10 +1350,12 @@ body.pagina-admin {
     padding: 34px 40px;
 }
 
+
 .painel h1 {
     text-align: center;
     margin-bottom: 8px;
 }
+
 
 .total-usuarios {
     text-align: center;
@@ -1439,11 +1364,13 @@ body.pagina-admin {
     margin-bottom: 24px;
 }
 
+
 .tabela-usuarios {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 28px;
 }
+
 
 .tabela-usuarios th,
 .tabela-usuarios td {
@@ -1453,6 +1380,7 @@ body.pagina-admin {
     font-size: 0.92rem;
 }
 
+
 .tabela-usuarios th {
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1460,9 +1388,11 @@ body.pagina-admin {
     color: #dfe3e8;
 }
 
+
 .tabela-usuarios tr:hover {
     background: rgba(255, 255, 255, 0.05);
 }
+
 
 .tabela-usuarios .acoes a {
     color: #fff;
@@ -1470,28 +1400,28 @@ body.pagina-admin {
     margin-right: 8px;
 }
 
+
 .tabela-usuarios .acoes form {
     display: inline;
 }
+
 
 .btn-excluir {
     background: transparent;
     border: 2px solid #e58a8a;
     color: #ffd9d9;
-    padding: 9px 20px;
-    min-height: 38px;
-    border-radius: var(--btn-radius);
+    padding: 6px 16px;
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: 700;
     font-size: 0.85rem;
-    transition: var(--btn-transition);
+    transition: background-color 0.2s ease;
 }
 
+
 .btn-excluir:hover {
-    background: #e58a8a;
-    color: #171717;
-    transform: translateY(-2px);
+    background: rgba(229, 138, 138, 0.2);
 }
+
 
 .ficha {
     max-width: 420px;
@@ -1504,9 +1434,11 @@ body.pagina-admin {
     text-align: center;
 }
 
+
 .ficha h1 {
     margin-bottom: 18px;
 }
+
 
 .ficha p {
     margin: 10px 0;
@@ -1514,38 +1446,46 @@ body.pagina-admin {
     text-align: left;
 }
 
+
 .ficha p strong {
     color: #dfe3e8;
     font-weight: 600;
     margin-right: 6px;
 }
 
+
 .ficha .voltar {
     margin-top: 22px;
 }
+
 
 .ficha.nao-encontrado p {
     text-align: center;
     color: #ffd9d9;
 }
 
+
 /* ==========================================================================
    13. MEDIA QUERIES (RESPONSIVIDADE UNIFICADA)
    ========================================================================== */
+
 
 @media (max-width: 900px) {
     .cards {
         grid-template-columns: repeat(2, 1fr);
     }
 
+
     .search {
         grid-template-columns: 1fr 1fr;
     }
+
 
     .search button {
         padding: 13px;
     }
 }
+
 
 @media (max-width: 800px) {
     .detail {
@@ -1553,34 +1493,42 @@ body.pagina-admin {
         gap: 25px;
     }
 
+
     .mainphoto {
         height: 350px;
     }
+
 
     .data h1 {
         font-size: 31px;
     }
 
+
     .profilehead {
         grid-template-columns: 70px 1fr;
     }
+
 
     .profilehead button {
         grid-column: 1 / -1;
     }
 
+
     .profilegrid {
         grid-template-columns: 1fr;
     }
+
 
     .publish {
         grid-template-columns: 1fr;
     }
 
+
     .vehicles {
         grid-template-columns: 1fr;
     }
 }
+
 
 @media (max-width: 750px) {
     .auth,
@@ -1590,27 +1538,33 @@ body.pagina-admin {
         padding: 40px 0;
     }
 
+
     .auth h1,
     .register-page h1 {
         font-size: 40px;
     }
 
+
     .auth > *:first-child {
         order: 2;
     }
+
 
     .auth > *:last-child {
         order: 1;
     }
 
+
     .grid {
         grid-template-columns: 1fr;
     }
+
 
     .home-cards {
         grid-template-columns: 1fr;
     }
 }
+
 
 @media (max-width: 700px) {
     .header .wrap {
@@ -1619,36 +1573,44 @@ body.pagina-admin {
         padding: 20px 24px;
     }
 
+
     nav {
         flex-wrap: wrap;
         justify-content: center;
     }
+
 
     .top {
         flex-direction: column;
         align-items: flex-start;
     }
 
+
     .content {
         grid-template-columns: 1fr;
     }
+
 
     .cards {
         grid-template-columns: 1fr;
     }
 
+
     .alerts article {
         grid-template-columns: 48px 1fr;
     }
+
 
     .alerts article button {
         grid-column: 2;
         justify-self: start;
     }
 
+
     .chat-container {
         padding: 0;
     }
+
 
     .chatpage {
         height: 100vh;
@@ -1656,35 +1618,43 @@ body.pagina-admin {
         grid-template-columns: 1fr;
     }
 
+
     .chatpage aside {
         display: none;
     }
+
 
     .messages p {
         max-width: 85%;
     }
 }
 
+
 @media (max-width: 550px) {
     .search {
         grid-template-columns: 1fr;
     }
 
+
     h1 {
         font-size: 30px;
     }
+
 
     .profilehead {
         padding: 22px;
     }
 
+
     .profilehead h1 {
         font-size: 25px;
     }
 
+
     .vehicle {
         flex-direction: column;
     }
+
 
     .vehiclephoto {
         width: 100%;
@@ -1692,14 +1662,17 @@ body.pagina-admin {
         min-height: 150px;
     }
 
+
     .info {
         padding: 25px;
     }
 }
 
+
 /* ==========================================================================
    14. PAINEL ADMINISTRATIVO (adm.html)
    ========================================================================== */
+
 
 .flex-between {
     display: flex;
@@ -1707,6 +1680,7 @@ body.pagina-admin {
     align-items: center;
     width: 100%;
 }
+
 
 .badge-adm {
     background: var(--r);
@@ -1719,27 +1693,29 @@ body.pagina-admin {
     letter-spacing: 1px;
 }
 
+
 .button.sm {
-    padding: 9px 16px;
-    min-height: 36px;
+    padding: 8px 14px;
     font-size: 13px;
 }
+
 
 .button.danger {
     background: #dc3545;
     color: #fff;
-    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.25);
 }
+
 
 .button.danger:hover {
     background: #bd2130;
-    box-shadow: 0 8px 18px rgba(220, 53, 69, 0.35);
 }
+
 
 .main-adm {
     padding-top: 40px;
     padding-bottom: 60px;
 }
+
 
 .adm-top {
     display: flex;
@@ -1747,6 +1723,7 @@ body.pagina-admin {
     align-items: flex-end;
     margin-bottom: 30px;
 }
+
 
 /* Grid de Cards */
 .adm-grid {
@@ -1756,6 +1733,7 @@ body.pagina-admin {
     margin-bottom: 35px;
 }
 
+
 .adm-card {
     background: #fff;
     border: 1px solid #ddd8d0;
@@ -1764,12 +1742,14 @@ body.pagina-admin {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
 
+
 .adm-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
 }
+
 
 .adm-card h3 {
     font-size: 14px;
@@ -1779,9 +1759,11 @@ body.pagina-admin {
     letter-spacing: 0.5px;
 }
 
+
 .adm-card-icon {
     font-size: 20px;
 }
+
 
 .stat-number {
     display: block;
@@ -1792,23 +1774,28 @@ body.pagina-admin {
     margin-bottom: 10px;
 }
 
+
 .stat-trend {
     font-size: 12px;
     font-weight: 600;
 }
 
+
 .stat-trend.positive {
     color: #2e7d32;
 }
+
 
 .stat-trend.neutral {
     color: #757575;
 }
 
+
 /* Tabela Admin */
 .adm-table-container {
     padding: 24px;
 }
+
 
 .table-header {
     display: flex;
@@ -1819,22 +1806,26 @@ body.pagina-admin {
     gap: 15px;
 }
 
+
 .table-search {
     padding: 8px 12px;
     font-size: 13px;
     width: 240px;
 }
 
+
 .table-responsive {
     width: 100%;
     overflow-x: auto;
 }
+
 
 .adm-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
 }
+
 
 .adm-table th {
     background: #faf9f7;
@@ -1846,6 +1837,7 @@ body.pagina-admin {
     border-bottom: 2px solid #eee;
 }
 
+
 .adm-table td {
     padding: 16px;
     border-bottom: 1px solid #eee;
@@ -1853,14 +1845,17 @@ body.pagina-admin {
     vertical-align: middle;
 }
 
+
 .adm-table tr:hover {
     background-color: #faf9f7;
 }
+
 
 .table-buttons {
     display: flex;
     gap: 8px;
 }
+
 
 .status-badge {
     display: inline-block;
@@ -1871,10 +1866,12 @@ body.pagina-admin {
     text-transform: uppercase;
 }
 
+
 .status-badge.active {
     background: #e8f5e9;
     color: #2e7d32;
 }
+
 
 @media (max-width: 700px) {
     .adm-top {
@@ -1883,15 +1880,18 @@ body.pagina-admin {
         gap: 15px;
     }
 
+
     .table-header {
         flex-direction: column;
         align-items: flex-start;
     }
 
+
     .table-search {
         width: 100%;
     }
 }
+
 
 /* Botão Flutuante do WhatsApp */
 .whatsapp-float {
@@ -1916,6 +1916,7 @@ body.pagina-admin {
 .whatsapp-float:hover {
     transform: scale(1.1);
 }
+
 
 /* Painel de Acessibilidade */
 .painel-acessibilidade {
@@ -1970,6 +1971,7 @@ body.pagina-admin {
     color: #000;
 }
 
+
 /* Estilo do Modo Alto Contraste */
 body.alto-contraste {
     background-color: #000 !important;
@@ -1982,15 +1984,16 @@ body.alto-contraste .adm-card {
     background-color: #111 !important;
     border: 1px solid #fff !important;
 }
-body.alto-contraste a, 
-body.alto-contraste h1, 
-body.alto-contraste h2, 
+body.alto-contraste a,
+body.alto-contraste h1,
+body.alto-contraste h2,
 body.alto-contraste h3 {
     color: #ffff00 !important;
 }
 /* ==========================================================================
    15. PRÉVIA DE FOTOS (publicar-anuncio.html / editar-anuncio.html)
    ========================================================================== */
+
 
 .previa-imagens {
     display: flex;
@@ -1999,8 +2002,10 @@ body.alto-contraste h3 {
     margin-top: 12px;
 }
 
+
 /* Esconde qualquer elemento marcado com a classe "oculto"
    (ex.: o formulário de veículo na garagem) */
 .oculto {
     display: none;
 }
+
