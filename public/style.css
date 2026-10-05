@@ -2009,3 +2009,32 @@ body.alto-contraste h3 {
     display: none;
 }
 
+
+
+/* 1. Limite global e segurança para todas as imagens do site */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 2. Contentor da foto do anúncio/veículo */
+.vehiclephoto {
+    width: 100%;
+    height: 250px; /* Ou a altura fixa desejada para os seus cartões */
+    max-height: 300px;
+    object-fit: cover; /* Recorta suavemente a imagem sem distorcer as proporções */
+    object-position: center; /* Centraliza o foco do recorte */
+    border-radius: 8px; /* Opcional: para manter os cantos arredondados */
+    overflow: hidden; /* Garante que nada saia fora dos limites do contentor */
+}
+
+/* 3. Garantia para quando a imagem for uma tag <img> direta dentro da classe .vehiclephoto */
+img.vehiclephoto,
+.vehiclephoto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}

@@ -132,10 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tagCategoria = escapeHtml((anuncio.categoria || 'Peça').toUpperCase());
                 const fotoTexto = escapeHtml((anuncio.marca || anuncio.modelo || anuncio.categoria || 'PEÇA').toUpperCase());
 
+                // RENDERIZAÇÃO DA IMAGEM: verifica se existe a propriedade de imagem da base de dados
+                const fotoHtml = anuncio.imagem
+                    ? `<img class="vehiclephoto" src="${escapeHtml(anuncio.imagem)}" alt="${escapeHtml(anuncio.nome)}" style="object-fit: cover;">`
+                    : `<div class="vehiclephoto">${fotoTexto}</div>`;
+
                 const artigo = document.createElement('article');
                 artigo.className = 'vehicle';
                 artigo.innerHTML = `
-                    <div class="vehiclephoto">${fotoTexto}</div>
+                    ${fotoHtml}
                     <div class="info">
                         <span>${tagCategoria}</span>
                         <h2>${escapeHtml(anuncio.nome)}</h2>
