@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const bcrypt = require("bcryptjs");
@@ -32,20 +33,48 @@ app.use(session({
     secret: "segredo_super_secreto",
     resave: false,
     saveUninitialized: false,
-    cookie: { 
-        maxAge: 1000 * 60 * 60 * 2 
-     } // Tempo de vida do cookie/sessão
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 2
+    } // Tempo de vida do cookie/sessão
 }));
 
 // Disponibiliza os arquivos da pasta public
 app.use(express.static(path.join(__dirname, "public")));
 
+// ==========================
+// MIDDLEWARES DE PROTEÇÃO
+// ==========================
+
 function exigirLogin(req, res, next) {
-    if (req.session.usuarioId){
-// next() significa "pode passar, segue pra rota normal".
+    if (req.session.usuarioId) {
+        // next() significa "pode passar, segue pra rota normal".
         return next();
     }
     return res.redirect("/login");
+}
+
+// E-mail do administrador, definido no arquivo .env (ADMIN_EMAIL=...)
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+
+if (!ADMIN_EMAIL) {
+    console.warn("⚠️  ADMIN_EMAIL não está definido no .env. Ninguém conseguirá acessar o painel /adm.");
+}
+
+// Só deixa passar quem estiver logado E for o e-mail do administrador.
+async function exigirAdmin(req, res, next) {
+    if (!req.session.usuarioId) return res.redirect("/login");
+
+    try {
+        const usuario = await usuarios.buscarPorId(req.session.usuarioId);
+
+        if (ADMIN_EMAIL && usuario && usuario.email.toLowerCase() === ADMIN_EMAIL) {
+            return next();
+        }
+
+        return res.status(403).send("Acesso restrito ao administrador.");
+    } catch (erro) {
+        next(erro);
+    }
 }
 
 //
@@ -54,12 +83,12 @@ function exigirLogin(req, res, next) {
 
 // pagina inicial
 app.get("/", (req, res) => {
-    if(req.session.usuarioId) {
-    // Está logado -> mostra a versão "logada" da página inicial   
+    if (req.session.usuarioId) {
+        // Está logado -> mostra a versão "logada" da página inicial
         res.sendFile(path.join(__dirname, "public", "Pagina_2.html"));
-    }else {
-    // Não está logado -> mostra a versão pública
-    res.sendFile(path.join(__dirname, "public", "Pagina_1.html"))
+    } else {
+        // Não está logado -> mostra a versão pública
+        res.sendFile(path.join(__dirname, "public", "Pagina_1.html"));
     }
 });
 
@@ -73,24 +102,34 @@ app.get("/cadastro", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "cadastro.html"));
 });
 
-// Rota da pagina do administrador
-app.get("/adm", exigirLogin, async (req, res) => {
-    const listaUsuarios = await usuarios.listarTodos();
-    res.render("adm", { listaUsuarios });
+// Rota da pagina do administrador — só o admin entra.
+// adminId é o id do admin logado: o adm.ejs usa pra mostrar o selo ADMIN
+// e esconder o botão "Excluir" da própria conta.
+app.get("/adm", exigirAdmin, async (req, res, next) => {
+    try {
+        const listaUsuarios = await usuarios.listarTodos();
+        res.render("adm", { listaUsuarios, adminId: req.session.usuarioId });
+    } catch (erro) {
+        next(erro);
+    }
 });
 
 // Rota de detalhe: mostra id, nome, email e telefone, sem formulário nenhum
-// Também protegida: só quem está logado pode ver os dados de um usuário.
-app.get("/usuarios/:id", exigirLogin, async (req, res) => {
-    const usuario = await usuarios.buscarPorId(req.params.id);
+// Só o admin pode ver os dados de um usuário.
+app.get("/usuarios/:id", exigirAdmin, async (req, res, next) => {
+    try {
+        const usuario = await usuarios.buscarPorId(req.params.id);
 
-    if (!usuario) {
-        return res.status(404).render("usuario-nao-encontrado", {
-            mensagem: `Não existe nenhum usuário com o ID ${req.params.id}.`
-        });
+        if (!usuario) {
+            return res.status(404).render("usuarioNaoEncontrado", {
+                mensagem: `Não existe nenhum usuário com o ID ${req.params.id}.`
+            });
+        }
+
+        res.render("usuarioDetalhe", { usuario });
+    } catch (erro) {
+        next(erro);
     }
-
-    res.render("usuario-detalhe", { usuario });
 });
 
 // Rota da API para buscar os dados do usuário logado na sessão
@@ -119,10 +158,22 @@ app.get("/api/meu-perfil", exigirLogin, async (req, res) => {
 // Rota da API para atualizar o próprio perfil
 app.put("/api/meu-perfil", exigirLogin, async (req, res) => {
     const { nome, email, telefone } = req.body;
+
+    if (!nome || !email || !telefone) {
+        return res.status(400).json({ erro: "Preencha nome, e-mail e telefone." });
+    }
+
     try {
-        await usuarios.atualizar(req.session.usuarioId, nome, email, telefone);
+        // E-mail sempre em minúsculas, igual ao cadastro: o login e a
+        // checagem de admin comparam em minúsculas.
+        const emailFormatado = email.trim().toLowerCase();
+
+        await usuarios.atualizar(req.session.usuarioId, nome, emailFormatado, telefone);
         res.json({ mensagem: "Perfil atualizado com sucesso!" });
     } catch (erro) {
+        if (erro.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({ erro: "Este e-mail já está em uso." });
+        }
         console.error("Erro ao atualizar perfil:", erro);
         res.status(500).json({ erro: "Erro ao atualizar os dados." });
     }
@@ -177,27 +228,32 @@ app.post("/cadastro", async (req, res) => {
     }
 });
 
-// Tela de edição — também protegida por login
-app.get("/usuarios/:id/editar", exigirLogin, async (req, res) => {
-    const usuario = await usuarios.buscarPorId(req.params.id);
+// Tela de edição de usuário — só o admin
+app.get("/usuarios/:id/editar", exigirAdmin, async (req, res, next) => {
+    try {
+        const usuario = await usuarios.buscarPorId(req.params.id);
 
-    if (!usuario) {
-        return res.status(404).render("usuario-nao-encontrado", {
-            mensagem: `Não existe nenhum usuário com o ID ${req.params.id} para editar.`
-        });
+        if (!usuario) {
+            return res.status(404).render("usuarioNaoEncontrado", {
+                mensagem: `Não existe nenhum usuário com o ID ${req.params.id} para editar.`
+            });
+        }
+
+        res.render("usuarioEditar", { usuario });
+    } catch (erro) {
+        next(erro);
     }
-
-    res.render("usuario-editar", { usuario });
 });
 
-// Salvar edição
-app.post("/usuarios/:id/editar", exigirLogin, async (req, res) => {
+// Salvar edição — só o admin
+app.post("/usuarios/:id/editar", exigirAdmin, async (req, res) => {
     const { nome, email, telefone, senha } = req.body;
 
     try {
         const senhaHash = senha ? await bcrypt.hash(senha, 10) : undefined;
+        const emailFormatado = (email || "").trim().toLowerCase();
 
-        await usuarios.atualizar(req.params.id, nome, email, telefone, senhaHash);
+        await usuarios.atualizar(req.params.id, nome, emailFormatado, telefone, senhaHash);
 
         res.redirect("/adm");
     } catch (erro) {
@@ -206,10 +262,18 @@ app.post("/usuarios/:id/editar", exigirLogin, async (req, res) => {
     }
 });
 
-// Excluir
-app.post("/usuarios/:id/excluir", exigirLogin, async (req, res) => {
-    await usuarios.excluir(req.params.id);
-    res.redirect("/adm");
+// Excluir — só o admin, e ele não pode excluir a própria conta
+app.post("/usuarios/:id/excluir", exigirAdmin, async (req, res, next) => {
+    try {
+        if (Number(req.params.id) === req.session.usuarioId) {
+            return res.redirect("/adm");
+        }
+
+        await usuarios.excluir(req.params.id);
+        res.redirect("/adm");
+    } catch (erro) {
+        next(erro);
+    }
 });
 
 // Rota para receber o formulario de login
@@ -234,6 +298,11 @@ app.post("/login", async (req, res) => {
 
         req.session.usuarioId = usuario.id;
 
+        // Se for o administrador, vai direto pro painel
+        if (ADMIN_EMAIL && usuario.email.toLowerCase() === ADMIN_EMAIL) {
+            return res.redirect("/adm");
+        }
+
         res.redirect("/");
     } catch (erro) {
         console.error(
@@ -245,12 +314,11 @@ app.post("/login", async (req, res) => {
 });
 
 // Rota de logout: apaga a sessão, ou seja, "esquece" que essa pessoa estava logada.
-
 app.get("/logout", (req, res) => {
-    //req.session.destroy() remove os dados da sessão guardados no
+    // req.session.destroy() remove os dados da sessão guardados no
     // servidor e invalida o cookie. O callback roda depois que a
     // destruição termina (é uma operação assíncrona por baixo dos panos).
-    req.session.destroy(() =>{
+    req.session.destroy(() => {
         res.redirect("/");
     });
 });
@@ -453,12 +521,15 @@ app.get("/teste-banco", async (req, res) => {
     }
 });
 
-// Tratamento de erros vindos do Multer (arquivo grande demais, tipo
-// inválido, etc.) — sem isso o usuário veria uma tela de erro genérica.
+// Tratamento de erros (Multer: arquivo grande demais, tipo inválido, etc.,
+// e qualquer erro repassado com next(erro) pelas rotas acima).
 app.use((erro, req, res, next) => {
     if (erro) {
-        console.error("Erro no upload:", erro.message);
-        return res.status(400).send(erro.message);
+        console.error("Erro:", erro.message);
+
+        // Erros do upload são "culpa" do envio (400); o resto é erro do servidor (500)
+        const ehErroDeUpload = erro.name === "MulterError" || erro.message === "Apenas arquivos de imagem são permitidos.";
+        return res.status(ehErroDeUpload ? 400 : 500).send(erro.message);
     }
     next();
 });
