@@ -94,7 +94,7 @@ async function carregarDetalhesAnuncio() {
                     </div>
                 </div>
 
-                <button class="button primary">Tenho interesse</button>
+                <a class="button primary" href="${linkConversa}" target="_blank" rel="noopener">Tenho interesse</a>
                 <a class="button secondary" href="${linkConversa}" target="_blank" rel="noopener">Conversar com vendedor</a>
 
                 <div class="seller">
