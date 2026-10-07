@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS anuncios (
     preco DECIMAL(10, 2) NOT NULL,
     marca VARCHAR(50),
     modelo VARCHAR(50),
-    ano_inicial INT,
-    ano_final INT,
+    ano_inicial YEAR,
+    ano_final YEAR,
     localizacao VARCHAR(100),
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
@@ -46,7 +46,8 @@ CREATE TABLE IF NOT EXISTS veiculos (
     usuario_id INT NOT NULL,
     marca VARCHAR(50) NOT NULL,
     modelo VARCHAR(50) NOT NULL,
-    ano INT NOT NULL,
+    ano_inicial YEAR,
+    ano_final YEAR,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );

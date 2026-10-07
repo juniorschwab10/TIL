@@ -137,6 +137,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? `<img class="vehiclephoto" src="${escapeHtml(anuncio.imagem)}" alt="${escapeHtml(anuncio.nome)}" style="object-fit: cover;">`
                     : `<div class="vehiclephoto">${fotoTexto}</div>`;
 
+                // Verifica na própria página se ela foi marcada como pública (Página 1)
+                const secaoAnuncios = document.getElementById('secao-anuncios');
+                const ehPaginaPublica = secaoAnuncios && secaoAnuncios.dataset.publico === 'true';
+
+                // Se for a Página 1 (pública), manda para o login. 
+                // Se for a Página 2 ou o catálogo, manda para a página do anúncio.
+                const linkDestino = ehPaginaPublica 
+                    ? 'login.html' 
+                    : `anuncio.html?id=${encodeURIComponent(anuncio.id)}`;
+
                 const artigo = document.createElement('article');
                 artigo.className = 'vehicle';
                 artigo.innerHTML = `
@@ -145,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span>${tagCategoria}</span>
                         <h2>${escapeHtml(anuncio.nome)}</h2>
                         <p class="muted">${precoFormatado}</p>
-                        <a href="anuncio.html?id=${encodeURIComponent(anuncio.id)}">Ver detalhes &rarr;</a>
+                        <a href="${linkDestino}">Ver detalhes &rarr;</a>
                     </div>
                 `;
                 container.appendChild(artigo);
