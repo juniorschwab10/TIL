@@ -10,6 +10,7 @@ const usuarios = require("./src/models/usuarios");
 const anuncios = require("./src/models/anuncios");
 const veiculos = require("./src/models/veiculos");
 const imagens = require("./src/models/imagens");
+const interesses = require("./src/models/interesses");
 const veiculosController = require("./src/controllers/veiculosController");
 const anunciosController = require("./src/controllers/anuncioController");
 
@@ -60,7 +61,8 @@ const PAGINAS_PROTEGIDAS = [
     "/publicar-anuncio.html",
     "/garagem.html",
     "/meusAnuncios.html",
-    "/editarAnuncio.html"
+    "/editarAnuncio.html",
+    "/meusInteresses.html"
 ];
 
 app.use((req, res, next) => {
@@ -492,6 +494,54 @@ app.put("/api/veiculos/:id", exigirLogin, veiculosController.atualizar);
 
 // API: exclui um veículo (só se for do usuário logado)
 app.delete("/api/veiculos/:id", exigirLogin, veiculosController.excluir);
+
+//
+// ROTAS DE INTERESSES (favoritos)
+//
+
+// Página "Meus interesses" — protegida por login
+app.get("/meus-interesses", exigirLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "meusInteresses.html"));
+});
+
+// API: lista as peças marcadas como interesse pelo usuário logado
+app.get("/api/meus-interesses", exigirLogin, async (req, res) => {
+    try {
+        const lista = await interesses.listarPorUsuario(req.session.usuarioId);
+        res.json(lista);
+    } catch (erro) {
+        console.error("Erro ao listar interesses:", erro);
+        res.status(500).json({ erro: "Erro ao carregar seus interesses." });
+    }
+});
+
+// API: marca interesse em um anúncio
+app.post("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
+    try {
+        const anuncio = await anuncios.buscarPorId(req.params.anuncioId);
+
+        if (!anuncio) {
+            return res.status(404).json({ erro: "Anúncio não encontrado." });
+        }
+
+        await interesses.adicionar(req.session.usuarioId, anuncio.id);
+        res.status(201).json({ mensagem: "Peça adicionada aos seus interesses." });
+    } catch (erro) {
+        console.error("Erro ao adicionar interesse:", erro);
+        res.status(500).json({ erro: "Erro ao salvar o interesse." });
+    }
+});
+
+// API: remove o interesse do usuário logado em um anúncio
+app.delete("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
+    try {
+        await interesses.remover(req.session.usuarioId, req.params.anuncioId);
+        res.json({ mensagem: "Interesse removido." });
+    } catch (erro) {
+        console.error("Erro ao remover interesse:", erro);
+        res.status(500).json({ erro: "Erro ao remover o interesse." });
+    }
+});
 
 //
 // TESTE DO BANCO

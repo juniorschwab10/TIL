@@ -2,6 +2,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ano = new Date().getFullYear();
 
+    // Os links institucionais apontam para as seções da página inicial
+    // ("/" abre Pagina_1 ou Pagina_2, e as duas têm esses mesmos ids).
+    // Usar "/#id" (e não só "#id") faz o link funcionar de qualquer página.
     const rodapeHTML = `
         <footer class="rodape-site">
             <div class="wrap rodape-grid">
@@ -33,10 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="rodape-col">
                     <h4>Institucional</h4>
                     <ul>
-                        <li><a href="#">Sobre nós</a></li>
-                        <li><a href="#">Termos de uso</a></li>
-                        <li><a href="#">Política de privacidade</a></li>
-                        <li><a href="#">Perguntas frequentes</a></li>
+                        <li><a href="/#sobre-nos">Sobre nós</a></li>
+                        <li><a href="/#termos-de-uso">Termos de uso</a></li>
+                        <li><a href="/#politica-de-privacidade">Política de privacidade</a></li>
+                        <li><a href="/#perguntas-frequentes">Perguntas frequentes</a></li>
                     </ul>
                 </div>
 
@@ -62,4 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     document.body.insertAdjacentHTML('beforeend', rodapeHTML);
+
+    // Se a pessoa chegou por um link como /#perguntas-frequentes, o rodapé é
+    // injetado depois do carregamento e o navegador pode não rolar até a seção.
+    // Aqui forçamos a rolagem quando o alvo existir na página.
+    if (window.location.hash) {
+        const alvo = document.getElementById(window.location.hash.slice(1));
+        if (alvo) alvo.scrollIntoView();
+    }
 });

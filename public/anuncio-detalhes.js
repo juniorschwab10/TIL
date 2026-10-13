@@ -94,7 +94,7 @@ async function carregarDetalhesAnuncio() {
                     </div>
                 </div>
 
-                <a class="button primary" href="${linkConversa}" target="_blank" rel="noopener">Tenho interesse</a>
+                <button type="button" class="button primary" id="btn-interesse">♡ Tenho interesse</button>
                 <a class="button secondary" href="${linkConversa}" target="_blank" rel="noopener">Conversar com vendedor</a>
 
                 <div class="seller">
@@ -121,6 +121,39 @@ async function carregarDetalhesAnuncio() {
                     fotoPrincipalImg.src = miniatura.dataset.url;
                 }
             });
+        });
+
+        // Botão "Tenho interesse": salva a peça na lista de interesses
+        // (favoritos) do usuário logado.
+        const btnInteresse = document.getElementById('btn-interesse');
+
+        btnInteresse.addEventListener('click', async () => {
+            btnInteresse.disabled = true;
+
+            try {
+                const respostaInteresse = await fetch(`/api/interesses/${encodeURIComponent(anuncioId)}`, {
+                    method: 'POST'
+                });
+
+                // Quem não está logado é mandado pro login
+                if (respostaInteresse.redirected || respostaInteresse.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (!respostaInteresse.ok) {
+                    const erro = await respostaInteresse.json().catch(() => ({}));
+                    alert(erro.erro || 'Erro ao adicionar aos interesses.');
+                    btnInteresse.disabled = false;
+                    return;
+                }
+
+                btnInteresse.textContent = '♥ Adicionado aos interesses';
+            } catch (erro) {
+                console.error('Erro ao salvar interesse:', erro);
+                alert('Erro ao adicionar aos interesses.');
+                btnInteresse.disabled = false;
+            }
         });
     } catch (erro) {
         console.error("Erro ao carregar os detalhes:", erro);
