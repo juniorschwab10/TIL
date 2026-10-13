@@ -51,3 +51,13 @@ CREATE TABLE IF NOT EXISTS veiculos (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS interesses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    anuncio_id INT NOT NULL,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unico_interesse (usuario_id, anuncio_id),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (anuncio_id) REFERENCES anuncios(id) ON DELETE CASCADE
+);
