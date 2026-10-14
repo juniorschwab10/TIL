@@ -62,7 +62,10 @@ const PAGINAS_PROTEGIDAS = [
     "/garagem.html",
     "/meusAnuncios.html",
     "/editarAnuncio.html",
-    "/meusInteresses.html"
+    "/meusInteresses.html",
+    // Versão "logada" da página inicial: o acesso normal é pela rota "/",
+    // que escolhe entre Pagina_1 e Pagina_2 conforme a sessão.
+    "/Pagina_2.html"
 ];
 
 app.use((req, res, next) => {
@@ -496,7 +499,7 @@ app.put("/api/veiculos/:id", exigirLogin, veiculosController.atualizar);
 app.delete("/api/veiculos/:id", exigirLogin, veiculosController.excluir);
 
 //
-// ROTAS DE INTERESSES (favoritos)
+// ROTAS DE INTERESSES (favoritos do usuário)
 //
 
 // Página "Meus interesses" — protegida por login
@@ -504,7 +507,7 @@ app.get("/meus-interesses", exigirLogin, (req, res) => {
     res.sendFile(path.join(__dirname, "public", "meusInteresses.html"));
 });
 
-// API: lista as peças marcadas como interesse pelo usuário logado
+// API: lista os anúncios marcados como interesse pelo usuário logado
 app.get("/api/meus-interesses", exigirLogin, async (req, res) => {
     try {
         const lista = await interesses.listarPorUsuario(req.session.usuarioId);
@@ -515,11 +518,21 @@ app.get("/api/meus-interesses", exigirLogin, async (req, res) => {
     }
 });
 
-// API: marca interesse em um anúncio
+// API: esse anúncio já está nos meus interesses?
+app.get("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
+    try {
+        const interessado = await interesses.existe(req.session.usuarioId, req.params.anuncioId);
+        res.json({ interessado });
+    } catch (erro) {
+        console.error("Erro ao checar interesse:", erro);
+        res.status(500).json({ erro: "Erro ao checar interesse." });
+    }
+});
+
+// API: adiciona o anúncio aos interesses
 app.post("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
     try {
         const anuncio = await anuncios.buscarPorId(req.params.anuncioId);
-
         if (!anuncio) {
             return res.status(404).json({ erro: "Anúncio não encontrado." });
         }
@@ -532,7 +545,7 @@ app.post("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
     }
 });
 
-// API: remove o interesse do usuário logado em um anúncio
+// API: remove o anúncio dos interesses
 app.delete("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
     try {
         await interesses.remover(req.session.usuarioId, req.params.anuncioId);

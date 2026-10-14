@@ -18,6 +18,15 @@ async function remover(usuarioId, anuncioId) {
     );
 }
 
+// Diz se o usuário já marcou interesse nesse anúncio.
+async function existe(usuarioId, anuncioId) {
+    const [linhas] = await banco.execute(
+        "SELECT 1 FROM interesses WHERE usuario_id = ? AND anuncio_id = ? LIMIT 1",
+        [usuarioId, anuncioId]
+    );
+    return linhas.length > 0;
+}
+
 // Lista os anúncios em que o usuário clicou "Tenho interesse",
 // do mais recente pro mais antigo, já com a primeira foto de cada um.
 async function listarPorUsuario(usuarioId) {
@@ -43,5 +52,6 @@ async function listarPorUsuario(usuarioId) {
 module.exports = {
     adicionar,
     remover,
+    existe,
     listarPorUsuario
 };

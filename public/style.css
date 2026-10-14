@@ -265,10 +265,22 @@ textarea:focus {
 
 
 .authbox {
-    background: var(--card);
-    border: 1px solid var(--bd);
+    background: #fff;
+    color: #000;
+    border: 1px solid #ddd8d0;
     padding: 40px;
     border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+
+/* Bloco de login: todos os textos em preto */
+.authbox h2,
+.authbox label,
+.authbox .muted,
+.authbox .back,
+.authbox .register {
+    color: #000;
 }
 
 
@@ -288,15 +300,30 @@ textarea:focus {
 }
 
 
+/* Login e cadastro: campos de digitação com fundo branco e texto preto */
 .authbox input,
 .register-page input {
     width: 100%;
     min-height: 44px;
     padding: 10px 12px;
-    background: #0e0e0e;
-    color: #fff;
-    border: 1px solid var(--bd);
+    background: #fff;
+    color: #000;
+    border: 1px solid #d5d0c8;
     border-radius: 4px;
+}
+
+
+.authbox input::placeholder,
+.register-page input::placeholder {
+    color: #888;
+}
+
+
+/* Evita que o autofill do navegador pinte o fundo de azul/amarelo */
+.authbox input:-webkit-autofill,
+.register-page input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset;
+    -webkit-text-fill-color: #000;
 }
 
 
@@ -328,7 +355,8 @@ textarea:focus {
 
 .register a,
 .authbox a:not(.back) {
-    color: #fff;
+    color: #000;
+    font-weight: 700;
 }
 
 
@@ -342,6 +370,7 @@ textarea:focus {
 .terms input {
     width: auto;
     min-height: auto;
+    background: transparent;
 }
 
 
@@ -800,9 +829,49 @@ aside input {
 
 .publish {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
+    grid-template-columns: 1fr;
     gap: 24px;
     padding-bottom: 60px;
+}
+
+
+.publish .panel h2 {
+    margin-bottom: 24px;
+}
+
+
+/* Espaçamento entre as linhas do formulário */
+.publish .panel > .input-container,
+.publish .panel > .grid {
+    margin-bottom: 20px;
+}
+
+
+/* Rótulo em cima do campo, e campos ocupando toda a largura da coluna */
+.publish .input-container label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+
+.publish .input-container input:not([type="file"]),
+.publish .input-container select,
+.publish .input-container textarea {
+    width: 100%;
+}
+
+
+.publish .input-container input[type="file"] {
+    width: 100%;
+    padding: 10px 12px;
+}
+
+
+.publish .input-container small {
+    display: block;
+    margin-top: 8px;
 }
 
 

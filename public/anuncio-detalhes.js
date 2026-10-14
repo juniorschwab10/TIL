@@ -123,36 +123,49 @@ async function carregarDetalhesAnuncio() {
             });
         });
 
-        // Botão "Tenho interesse": salva a peça na lista de interesses
-        // (favoritos) do usuário logado.
+        // ---- Botão "Tenho interesse" (favoritos) ----
         const btnInteresse = document.getElementById('btn-interesse');
+        let interessado = false;
+
+        function atualizarBotaoInteresse() {
+            btnInteresse.textContent = interessado ? '♥ Nos meus interesses' : '♡ Tenho interesse';
+        }
+
+        // Estado inicial: se o usuário já marcou interesse, o botão já abre "ativo".
+        // Se não estiver logado, a resposta é redirecionada pro login e o botão
+        // simplesmente fica no padrão.
+        try {
+            const r = await fetch(`/api/interesses/${encodeURIComponent(anuncio.id)}`);
+            if (r.ok && !r.redirected) {
+                interessado = (await r.json()).interessado;
+                atualizarBotaoInteresse();
+            }
+        } catch (_) {
+            // sem problema: o botão fica no estado padrão
+        }
 
         btnInteresse.addEventListener('click', async () => {
-            btnInteresse.disabled = true;
-
             try {
-                const respostaInteresse = await fetch(`/api/interesses/${encodeURIComponent(anuncioId)}`, {
-                    method: 'POST'
+                const resposta = await fetch(`/api/interesses/${encodeURIComponent(anuncio.id)}`, {
+                    method: interessado ? 'DELETE' : 'POST'
                 });
 
-                // Quem não está logado é mandado pro login
-                if (respostaInteresse.redirected || respostaInteresse.status === 401) {
+                if (resposta.status === 401 || resposta.redirected) {
                     window.location.href = '/login';
                     return;
                 }
 
-                if (!respostaInteresse.ok) {
-                    const erro = await respostaInteresse.json().catch(() => ({}));
-                    alert(erro.erro || 'Erro ao adicionar aos interesses.');
-                    btnInteresse.disabled = false;
+                if (!resposta.ok) {
+                    const erro = await resposta.json().catch(() => ({}));
+                    alert(erro.erro || 'Erro ao atualizar seus interesses.');
                     return;
                 }
 
-                btnInteresse.textContent = '♥ Adicionado aos interesses';
+                interessado = !interessado;
+                atualizarBotaoInteresse();
             } catch (erro) {
-                console.error('Erro ao salvar interesse:', erro);
-                alert('Erro ao adicionar aos interesses.');
-                btnInteresse.disabled = false;
+                console.error('Erro ao atualizar interesse:', erro);
+                alert('Erro ao atualizar seus interesses.');
             }
         });
     } catch (erro) {
