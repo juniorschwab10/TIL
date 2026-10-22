@@ -17,8 +17,18 @@ const anunciosController = require("./src/controllers/anuncioController");
 const app = express();
 const PORT = 3000;
 
-// ID do usuário administrador (pode vir do .env; se não tiver, usa o 1)
-const ADMIN_ID = Number(process.env.ADMIN_ID) || 1;
+// O administrador é definido pelo e-mail (ADMIN_EMAIL no .env).
+// Se não houver ADMIN_EMAIL (ou o e-mail não estiver cadastrado),
+// cai no ADMIN_ID antigo (pode vir do .env; se não tiver, usa o 1).
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+const ADMIN_ID_FALLBACK = Number(process.env.ADMIN_ID) || 1;
+
+// Descobre o id do admin a partir do e-mail.
+async function obterAdminId() {
+    if (!ADMIN_EMAIL) return ADMIN_ID_FALLBACK;
+    const admin = await usuarios.buscarPorEmail(ADMIN_EMAIL);
+    return admin ? Number(admin.id) : ADMIN_ID_FALLBACK;
+}
 
 // Configura o EJS como "view engine": a partir daqui, res.render("nome")
 // procura o arquivo em views/nome.ejs automaticamente.
@@ -80,14 +90,20 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Só o administrador passa. Quem não está logado vai pro login;
 // quem está logado mas não é admin recebe 403.
-function exigirAdmin(req, res, next) {
+async function exigirAdmin(req, res, next) {
     if (!req.session.usuarioId) {
         return res.redirect("/login");
     }
-    if (Number(req.session.usuarioId) === ADMIN_ID) {
-        return next();
+    try {
+        const adminId = await obterAdminId();
+        if (Number(req.session.usuarioId) === adminId) {
+            return next();
+        }
+        return res.status(403).send("Acesso restrito ao administrador.");
+    } catch (erro) {
+        console.error("Erro ao verificar admin:", erro);
+        return res.status(500).send("Erro ao verificar permissão.");
     }
-    return res.status(403).send("Acesso restrito ao administrador.");
 }
 
 //
@@ -119,7 +135,7 @@ app.get("/cadastro", (req, res) => {
 app.get("/adm", exigirAdmin, async (req, res) => {
     try {
         const listaUsuarios = await usuarios.listarTodos();
-        res.render("adm", { listaUsuarios, adminId: ADMIN_ID });
+        res.render("adm", { listaUsuarios, adminId: await obterAdminId() });
     } catch (erro) {
         console.error("Erro ao carregar painel adm:", erro);
         res.status(500).send("Erro ao carregar o painel.");
@@ -267,11 +283,11 @@ app.post("/usuarios/:id/editar", exigirAdmin, async (req, res) => {
 
 // Excluir (o administrador não pode excluir a própria conta por aqui)
 app.post("/usuarios/:id/excluir", exigirAdmin, async (req, res) => {
-    if (Number(req.params.id) === ADMIN_ID) {
-        return res.status(400).send("A conta do administrador não pode ser excluída.");
-    }
-
     try {
+        if (Number(req.params.id) === await obterAdminId()) {
+            return res.status(400).send("A conta do administrador não pode ser excluída.");
+        }
+
         await usuarios.excluir(req.params.id);
         res.redirect("/adm");
     } catch (erro) {
@@ -301,6 +317,16 @@ app.post("/login", async (req, res) => {
         }
 
         req.session.usuarioId = usuario.id;
+
+        // Quem entra com o e-mail do admin cai direto no painel
+        // Compara pelo id (resolvido a partir do ADMIN_EMAIL), assim não
+        // depende de maiúsculas/minúsculas no e-mail guardado no banco.
+        const adminId = await obterAdminId();
+        console.log(`Login: usuario.id=${usuario.id} | adminId=${adminId} | ADMIN_EMAIL="${ADMIN_EMAIL}"`);
+
+        if (Number(usuario.id) === adminId) {
+            return res.redirect("/adm");
+        }
 
         res.redirect("/");
     } catch (erro) {
@@ -595,4 +621,5 @@ app.use((erro, req, res, next) => {
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
+    console.log(`ADMIN_EMAIL carregado: "${ADMIN_EMAIL || "(vazio, usando ADMIN_ID)"}"`);
 });
