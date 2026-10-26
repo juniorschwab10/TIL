@@ -61,3 +61,23 @@ CREATE TABLE IF NOT EXISTS interesses (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (anuncio_id) REFERENCES anuncios(id) ON DELETE CASCADE
 );
+
+-- Tabela de avaliaçao de anuncios
+
+CREATE TABLE IF NOT EXISTS avaliacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    anuncio_id INT NULL,
+    avaliador_id INT NOT NULL,
+    vendedor_id INT NOT NULL,
+    nota TINYINT NOT NULL,
+    comentario VARCHAR(500),
+    resposta VARCHAR(500),
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- Uma avaliação por comprador em cada anúncio
+    UNIQUE KEY avaliacao_unica (avaliador_id, anuncio_id),
+    CONSTRAINT chk_nota CHECK (nota BETWEEN 1 AND 5),
+    -- Se o anúncio for excluído, a avaliação continua valendo para o vendedor
+    FOREIGN KEY (anuncio_id) REFERENCES anuncios(id) ON DELETE SET NULL,
+    FOREIGN KEY (avaliador_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (vendedor_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);

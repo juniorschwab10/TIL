@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const usuarios = require("../models/usuarios");
 
 async function cadastrar(req, res) {
-    const { nome, email, telefone, senha } = req.body;
+    const { nome, email, telefone, senha, confirmar_senha } = req.body;
 
     if (!nome || !email || !telefone || !senha) {
         return res.status(400).send("Preencha todos os campos.");
@@ -10,6 +10,10 @@ async function cadastrar(req, res) {
 
     if (senha.length < 6) {
         return res.status(400).send("A senha deve ter pelo menos 6 caracteres.");
+    }
+
+    if (senha !== confirmar_senha) {
+        return res.status(400).send("As senhas não coincidem.");
     }
 
     try {

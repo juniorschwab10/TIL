@@ -18,7 +18,8 @@ async function remover(usuarioId, anuncioId) {
     );
 }
 
-// Diz se o usuário já marcou interesse nesse anúncio.
+// Informa se o usuário já marcou interesse nesse anúncio.
+// Usado pelas avaliações: só quem demonstrou interesse pode avaliar o vendedor.
 async function existe(usuarioId, anuncioId) {
     const [linhas] = await banco.execute(
         "SELECT 1 FROM interesses WHERE usuario_id = ? AND anuncio_id = ? LIMIT 1",

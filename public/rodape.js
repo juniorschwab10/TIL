@@ -1,5 +1,7 @@
 // Rodapé compartilhado: injetado no fim do <body> de todas as páginas.
 document.addEventListener('DOMContentLoaded', () => {
+    // Dados de contato vêm de contato.js (único lugar com o número)
+    const CONTATO = window.CONTATO;
     const ano = new Date().getFullYear();
 
     // Os links institucionais apontam para as seções da página inicial
@@ -46,8 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="rodape-col">
                     <h4>Contato</h4>
                     <ul class="rodape-contato">
-                        <li>📞 <a href="tel:+5545999999999">(45) 99999-9999</a></li>
-                        <li>💬 <a href="https://api.whatsapp.com/send?phone=5545999999999&text=Olá!%20Vim%20pelo%20site%20The%20Iron%20Legacy." target="_blank" rel="noopener">WhatsApp</a></li>
+                        <li>📞 <a href="${CONTATO.telefoneLink()}">${CONTATO.telefoneExibicao}</a></li>
+                        <li>💬 <a href="${CONTATO.whatsappLink()}" target="_blank" rel="noopener">WhatsApp</a></li>
                         <li>✉️ <a href="mailto:contato@theironlegacy.com.br">contato@theironlegacy.com.br</a></li>
                         <li>📍 Foz do Iguaçu, PR – Brasil</li>
                         <li>🕘 Seg a Sex, 8h às 18h</li>

@@ -13,22 +13,13 @@ const imagens = require("./src/models/imagens");
 const interesses = require("./src/models/interesses");
 const veiculosController = require("./src/controllers/veiculosController");
 const anunciosController = require("./src/controllers/anuncioController");
+const avaliacoesController = require("./src/controllers/avaliacoesController");
 
 const app = express();
 const PORT = 3000;
 
-// O administrador é definido pelo e-mail (ADMIN_EMAIL no .env).
-// Se não houver ADMIN_EMAIL (ou o e-mail não estiver cadastrado),
-// cai no ADMIN_ID antigo (pode vir do .env; se não tiver, usa o 1).
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
-const ADMIN_ID_FALLBACK = Number(process.env.ADMIN_ID) || 1;
-
-// Descobre o id do admin a partir do e-mail.
-async function obterAdminId() {
-    if (!ADMIN_EMAIL) return ADMIN_ID_FALLBACK;
-    const admin = await usuarios.buscarPorEmail(ADMIN_EMAIL);
-    return admin ? Number(admin.id) : ADMIN_ID_FALLBACK;
-}
+// ID do usuário administrador (pode vir do .env; se não tiver, usa o 1)
+const ADMIN_ID = Number(process.env.ADMIN_ID) || 1;
 
 // Configura o EJS como "view engine": a partir daqui, res.render("nome")
 // procura o arquivo em views/nome.ejs automaticamente.
@@ -72,10 +63,7 @@ const PAGINAS_PROTEGIDAS = [
     "/garagem.html",
     "/meusAnuncios.html",
     "/editarAnuncio.html",
-    "/meusInteresses.html",
-    // Versão "logada" da página inicial: o acesso normal é pela rota "/",
-    // que escolhe entre Pagina_1 e Pagina_2 conforme a sessão.
-    "/Pagina_2.html"
+    "/meusInteresses.html"
 ];
 
 app.use((req, res, next) => {
@@ -90,20 +78,14 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Só o administrador passa. Quem não está logado vai pro login;
 // quem está logado mas não é admin recebe 403.
-async function exigirAdmin(req, res, next) {
+function exigirAdmin(req, res, next) {
     if (!req.session.usuarioId) {
         return res.redirect("/login");
     }
-    try {
-        const adminId = await obterAdminId();
-        if (Number(req.session.usuarioId) === adminId) {
-            return next();
-        }
-        return res.status(403).send("Acesso restrito ao administrador.");
-    } catch (erro) {
-        console.error("Erro ao verificar admin:", erro);
-        return res.status(500).send("Erro ao verificar permissão.");
+    if (Number(req.session.usuarioId) === ADMIN_ID) {
+        return next();
     }
+    return res.status(403).send("Acesso restrito ao administrador.");
 }
 
 //
@@ -135,7 +117,7 @@ app.get("/cadastro", (req, res) => {
 app.get("/adm", exigirAdmin, async (req, res) => {
     try {
         const listaUsuarios = await usuarios.listarTodos();
-        res.render("adm", { listaUsuarios, adminId: await obterAdminId() });
+        res.render("adm", { listaUsuarios, adminId: ADMIN_ID });
     } catch (erro) {
         console.error("Erro ao carregar painel adm:", erro);
         res.status(500).send("Erro ao carregar o painel.");
@@ -283,11 +265,11 @@ app.post("/usuarios/:id/editar", exigirAdmin, async (req, res) => {
 
 // Excluir (o administrador não pode excluir a própria conta por aqui)
 app.post("/usuarios/:id/excluir", exigirAdmin, async (req, res) => {
-    try {
-        if (Number(req.params.id) === await obterAdminId()) {
-            return res.status(400).send("A conta do administrador não pode ser excluída.");
-        }
+    if (Number(req.params.id) === ADMIN_ID) {
+        return res.status(400).send("A conta do administrador não pode ser excluída.");
+    }
 
+    try {
         await usuarios.excluir(req.params.id);
         res.redirect("/adm");
     } catch (erro) {
@@ -317,16 +299,6 @@ app.post("/login", async (req, res) => {
         }
 
         req.session.usuarioId = usuario.id;
-
-        // Quem entra com o e-mail do admin cai direto no painel
-        // Compara pelo id (resolvido a partir do ADMIN_EMAIL), assim não
-        // depende de maiúsculas/minúsculas no e-mail guardado no banco.
-        const adminId = await obterAdminId();
-        console.log(`Login: usuario.id=${usuario.id} | adminId=${adminId} | ADMIN_EMAIL="${ADMIN_EMAIL}"`);
-
-        if (Number(usuario.id) === adminId) {
-            return res.redirect("/adm");
-        }
 
         res.redirect("/");
     } catch (erro) {
@@ -504,6 +476,20 @@ app.delete("/api/anuncios/:id/imagens/:imagemId", exigirLogin, anunciosControlle
 app.delete("/api/anuncios/:id", exigirLogin, anunciosController.excluir);
 
 //
+// ROTAS DE AVALIAÇÕES (reputação do vendedor)
+//
+
+// API pública: avaliações do vendedor do anúncio + média. Se houver alguém
+// logado, também diz se essa pessoa já pode avaliar.
+app.get("/api/anuncios/:id/avaliacoes", avaliacoesController.listarPorAnuncio);
+
+// API: envia uma avaliação (só quem clicou em "Tenho interesse" no anúncio)
+app.post("/api/anuncios/:id/avaliacoes", exigirLogin, avaliacoesController.criar);
+
+// API: o vendedor responde publicamente a uma avaliação recebida
+app.put("/api/avaliacoes/:id/resposta", exigirLogin, avaliacoesController.responder);
+
+//
 // ROTAS DE VEÍCULOS (garagem do usuário)
 //
 
@@ -525,7 +511,7 @@ app.put("/api/veiculos/:id", exigirLogin, veiculosController.atualizar);
 app.delete("/api/veiculos/:id", exigirLogin, veiculosController.excluir);
 
 //
-// ROTAS DE INTERESSES (favoritos do usuário)
+// ROTAS DE INTERESSES (favoritos)
 //
 
 // Página "Meus interesses" — protegida por login
@@ -533,7 +519,7 @@ app.get("/meus-interesses", exigirLogin, (req, res) => {
     res.sendFile(path.join(__dirname, "public", "meusInteresses.html"));
 });
 
-// API: lista os anúncios marcados como interesse pelo usuário logado
+// API: lista as peças marcadas como interesse pelo usuário logado
 app.get("/api/meus-interesses", exigirLogin, async (req, res) => {
     try {
         const lista = await interesses.listarPorUsuario(req.session.usuarioId);
@@ -544,21 +530,11 @@ app.get("/api/meus-interesses", exigirLogin, async (req, res) => {
     }
 });
 
-// API: esse anúncio já está nos meus interesses?
-app.get("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
-    try {
-        const interessado = await interesses.existe(req.session.usuarioId, req.params.anuncioId);
-        res.json({ interessado });
-    } catch (erro) {
-        console.error("Erro ao checar interesse:", erro);
-        res.status(500).json({ erro: "Erro ao checar interesse." });
-    }
-});
-
-// API: adiciona o anúncio aos interesses
+// API: marca interesse em um anúncio
 app.post("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
     try {
         const anuncio = await anuncios.buscarPorId(req.params.anuncioId);
+
         if (!anuncio) {
             return res.status(404).json({ erro: "Anúncio não encontrado." });
         }
@@ -571,7 +547,7 @@ app.post("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
     }
 });
 
-// API: remove o anúncio dos interesses
+// API: remove o interesse do usuário logado em um anúncio
 app.delete("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
     try {
         await interesses.remover(req.session.usuarioId, req.params.anuncioId);
@@ -621,5 +597,4 @@ app.use((erro, req, res, next) => {
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
-    console.log(`ADMIN_EMAIL carregado: "${ADMIN_EMAIL || "(vazio, usando ADMIN_ID)"}"`);
 });

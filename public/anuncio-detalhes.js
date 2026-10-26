@@ -61,9 +61,12 @@ async function carregarDetalhesAnuncio() {
         const telefoneVendedor = String(anuncio.vendedor?.telefone || '');
         const telefoneDigitos = telefoneVendedor.replace(/\D/g, '');
         const telefoneWhats = telefoneDigitos.length <= 11 ? `55${telefoneDigitos}` : telefoneDigitos;
+
+        // Sem telefone não há como abrir conversa: o link fica null e o
+        // botão "Conversar com vendedor" nem é desenhado na tela.
         const linkConversa = telefoneDigitos
             ? `https://api.whatsapp.com/send?phone=${telefoneWhats}&text=${encodeURIComponent(`Olá, tenho interesse no anúncio ${anuncio.nome}`)}`
-            : 'chat.html';
+            : null;
 
         container.innerHTML = `
             <div>
@@ -95,7 +98,9 @@ async function carregarDetalhesAnuncio() {
                 </div>
 
                 <button type="button" class="button primary" id="btn-interesse">♡ Tenho interesse</button>
-                <a class="button secondary" href="${linkConversa}" target="_blank" rel="noopener">Conversar com vendedor</a>
+                ${linkConversa
+                    ? `<a class="button secondary" href="${linkConversa}" target="_blank" rel="noopener">Conversar com vendedor</a>`
+                    : ''}
 
                 <div class="seller">
                     <div class="avatar">${escapeHtml(iniciais)}</div>
