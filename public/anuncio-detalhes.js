@@ -137,8 +137,7 @@ async function carregarDetalhesAnuncio() {
         }
 
         // Estado inicial: se o usuário já marcou interesse, o botão já abre "ativo".
-        // Se não estiver logado, a resposta é redirecionada pro login e o botão
-        // simplesmente fica no padrão.
+        // Se não estiver logado, o servidor responde { interessado: false }.
         try {
             const r = await fetch(`/api/interesses/${encodeURIComponent(anuncio.id)}`);
             if (r.ok && !r.redirected) {
@@ -168,6 +167,10 @@ async function carregarDetalhesAnuncio() {
 
                 interessado = !interessado;
                 atualizarBotaoInteresse();
+
+                // Marcar interesse libera (ou bloqueia) o formulário de avaliação,
+                // então recarrega a seção de avaliações (definida em avaliacoes.js).
+                window.recarregarAvaliacoes?.();
             } catch (erro) {
                 console.error('Erro ao atualizar interesse:', erro);
                 alert('Erro ao atualizar seus interesses.');

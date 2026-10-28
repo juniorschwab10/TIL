@@ -24,6 +24,9 @@
         <section class="detail" id="conteudo-anuncio">
             <p class="muted">Carregando detalhes do anúncio...</p>
         </section>
+
+        <!-- Avaliações do vendedor (preenchida pelo avaliacoes.js) -->
+        <section id="secao-avaliacoes" style="padding-bottom:40px;"></section>
     </main>
 
     <!-- 1. Widget do VLibras (Tradução em Libras) -->
@@ -48,9 +51,10 @@
        </svg>
     </a>
 
-    <!-- 3. Scripts Separados -->
+    <!-- 3. Scripts Separados (a ordem importa: utils → detalhes → avaliações) -->
     <script src="utils.js"></script>
     <script src="anuncio-detalhes.js"></script>
+    <script src="avaliacoes.js"></script>
     <script src="acessibilidade.js"></script>
     <script src="/contato.js"></script>
     <script src="/rodape.js"></script>

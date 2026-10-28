@@ -530,6 +530,28 @@ app.get("/api/meus-interesses", exigirLogin, async (req, res) => {
     }
 });
 
+// API: informa se o usuário logado já marcou interesse neste anúncio.
+// Usada pelo botão "Tenho interesse" pra abrir no estado certo (e, por
+// consequência, pelas avaliações, que só liberam pra quem marcou interesse).
+// Sem login, simplesmente responde "interessado: false".
+app.get("/api/interesses/:anuncioId", async (req, res) => {
+    try {
+        if (!req.session.usuarioId) {
+            return res.json({ interessado: false });
+        }
+
+        const interessado = await interesses.existe(
+            req.session.usuarioId,
+            req.params.anuncioId
+        );
+
+        res.json({ interessado });
+    } catch (erro) {
+        console.error("Erro ao verificar interesse:", erro);
+        res.status(500).json({ erro: "Erro ao verificar o interesse." });
+    }
+});
+
 // API: marca interesse em um anúncio
 app.post("/api/interesses/:anuncioId", exigirLogin, async (req, res) => {
     try {

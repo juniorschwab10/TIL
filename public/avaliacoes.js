@@ -191,5 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Deixa o anuncio-detalhes.js recarregar as avaliações quando o
+    // usuário marcar/desmarcar interesse (isso libera o formulário).
+    window.recarregarAvaliacoes = carregarAvaliacoes;
+
     carregarAvaliacoes();
 });
