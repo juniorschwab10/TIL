@@ -1,4 +1,6 @@
 // Rodapé compartilhado: injetado no fim do <body> de todas as páginas.
+// Também acrescenta o link "Alertas" (com o contador de notificações não
+// lidas) ao menu do topo das páginas da área logada.
 document.addEventListener('DOMContentLoaded', () => {
     // Dados de contato vêm de contato.js (único lugar com o número)
     const CONTATO = window.CONTATO;
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <li><a href="/anuncios.html">Peças</a></li>
                         <li><a href="/publicar-anuncio.html">Publicar anúncio</a></li>
                         <li><a href="/garagem">Minha garagem</a></li>
+                        <li><a href="/alertas.html">Meus alertas</a></li>
                         <li><a href="/perfil.html">Meu perfil</a></li>
                     </ul>
                 </div>
@@ -74,5 +77,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.hash) {
         const alvo = document.getElementById(window.location.hash.slice(1));
         if (alvo) alvo.scrollIntoView();
+    }
+
+    // ---- Link "Alertas" no menu do topo, com contador de não lidas ----
+    // Não aparece no painel administrativo nem nas páginas sem menu
+    // (início público, login e cadastro).
+    const caminho = window.location.pathname;
+    const ehAdmin = caminho.startsWith('/adm') || caminho.startsWith('/usuarios');
+    const menu = document.querySelector('header nav');
+
+    if (menu && !ehAdmin && !menu.querySelector('[data-alertas]')) {
+        const link = document.createElement('a');
+        link.href = '/alertas.html';
+        link.dataset.alertas = 'true';
+        link.textContent = 'Alertas';
+        menu.appendChild(link);
+
+        // Visitante sem login: a API redireciona pro login e o contador não aparece.
+        fetch('/api/notificacoes/nao-lidas')
+            .then(resposta => (resposta.ok && !resposta.redirected ? resposta.json() : null))
+            .then(dados => {
+                if (!dados || !(dados.total > 0)) return;
+
+                const selo = document.createElement('span');
+                selo.textContent = dados.total > 99 ? '99+' : String(dados.total);
+                selo.setAttribute('aria-label', `${dados.total} notificações não lidas`);
+                selo.style.cssText = 'background:#c62828; color:#fff; border-radius:10px; padding:1px 7px; font-size:11px; font-weight:800; margin-left:6px;';
+                link.appendChild(selo);
+            })
+            .catch(() => {});
     }
 });

@@ -101,11 +101,19 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = '';
 
             if (!anuncios || anuncios.length === 0) {
+                // Sem resultado e com filtro: sugere limpar os filtros OU criar um
+                // alerta (o link leva a /alertas.html já com a busca preenchida).
+                const linkAlerta = filtros.busca
+                    ? `/alertas.html?termo=${encodeURIComponent(filtros.busca)}`
+                    : '/alertas.html';
+
                 container.innerHTML = haFiltroAtivo(filtros)
                     ? `
                         <p class="muted">
-                            Nenhum anúncio encontrado com esses filtros. Tente mudar a busca ou
-                            <button type="button" class="link-accent" id="link-limpar-resultado" style="background:none; border:none; cursor:pointer; padding:0;">limpar os filtros</button>.
+                            Nenhum anúncio encontrado com esses filtros. Tente mudar a busca,
+                            <button type="button" class="link-accent" id="link-limpar-resultado" style="background:none; border:none; cursor:pointer; padding:0;">limpar os filtros</button>
+                            ou <a href="${linkAlerta}" class="link-accent"><b>criar um alerta</b></a>
+                            para ser avisado quando essa peça for anunciada.
                         </p>
                       `
                     : '<p class="muted">Nenhum anúncio cadastrado até o momento.</p>';

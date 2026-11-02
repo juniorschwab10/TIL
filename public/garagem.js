@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputMarca = document.getElementById('veiculo-marca');
     const inputModelo = document.getElementById('veiculo-modelo');
     const inputAnoInicial = document.getElementById('veiculo-ano-inicial');
-    const inputAnoFinal = document.getElementById('veiculo-ano-final');
     const btnNovo = document.getElementById('btn-novo-veiculo');
     const btnCancelar = document.getElementById('btn-cancelar-veiculo');
 
@@ -18,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
             inputMarca.value = veiculo.marca;
             inputModelo.value = veiculo.modelo;
             inputAnoInicial.value = veiculo.ano_inicial;
-            inputAnoFinal.value = veiculo.ano_final || '';
         } else {
             tituloForm.innerText = 'Novo veículo';
             form.reset();
@@ -108,8 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dados = {
             marca: inputMarca.value,
             modelo: inputModelo.value,
-            ano_inicial: inputAnoInicial.value,
-            ano_final: inputAnoFinal.value || null
+            ano_inicial: inputAnoInicial.value
         };
 
         const id = inputId.value;

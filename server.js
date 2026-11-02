@@ -14,6 +14,7 @@ const interesses = require("./src/models/interesses");
 const veiculosController = require("./src/controllers/veiculosController");
 const anunciosController = require("./src/controllers/anuncioController");
 const avaliacoesController = require("./src/controllers/avaliacoesController");
+const alertasController = require("./src/controllers/alertasController");
 
 const app = express();
 const PORT = 3000;
@@ -63,7 +64,8 @@ const PAGINAS_PROTEGIDAS = [
     "/garagem.html",
     "/meusAnuncios.html",
     "/editarAnuncio.html",
-    "/meusInteresses.html"
+    "/meusInteresses.html",
+    "/alertas.html"
 ];
 
 app.use((req, res, next) => {
@@ -190,7 +192,7 @@ app.put("/api/meu-perfil", exigirLogin, async (req, res) => {
 
 //  Rota para receber o formulario de cadastro
 app.post("/cadastro", async (req, res) => {
-    const { nome, email, telefone, senha } = req.body;
+    const { nome, email, telefone, senha, confirmar_senha } = req.body;
 
     if (!nome || !email || !telefone || !senha) {
         return res.status(400).send(
@@ -201,6 +203,12 @@ app.post("/cadastro", async (req, res) => {
     if (senha.length < 6) {
         return res.status(400).send(
             "A senha deve ter pelo menos 6 caracteres."
+        );
+    }
+
+    if (senha !== confirmar_senha) {
+        return res.status(400).send(
+            "As senhas não coincidem."
         );
     }
 
@@ -399,6 +407,25 @@ app.post("/anuncios", exigirLogin, upload.array("imagens", 3), async (req, res) 
             await fs.unlink(arquivo.path);
         }
 
+        // Cruza o anúncio com os alertas de compatibilidade e notifica quem
+        // procurava essa peça. Se der erro aqui, o anúncio já foi publicado:
+        // só registramos no console e seguimos.
+        try {
+            await alertasController.gerarNotificacoes({
+                id: idAnuncio,
+                usuario_id: req.session.usuarioId,
+                nome,
+                categoria,
+                descricao,
+                marca,
+                modelo,
+                ano_inicial,
+                ano_final
+            });
+        } catch (erroAlerta) {
+            console.error("Erro ao gerar notificações de alertas:", erroAlerta);
+        }
+
         res.redirect("/anuncios.html");
     } catch (erro) {
         // Se deu erro no meio do caminho, limpa os temporários que
@@ -488,6 +515,36 @@ app.post("/api/anuncios/:id/avaliacoes", exigirLogin, avaliacoesController.criar
 
 // API: o vendedor responde publicamente a uma avaliação recebida
 app.put("/api/avaliacoes/:id/resposta", exigirLogin, avaliacoesController.responder);
+
+//
+// ROTAS DE ALERTAS E NOTIFICAÇÕES (compatibilidade de peças)
+//
+
+// Página "Alertas" — protegida por login
+app.get("/alertas", exigirLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "alertas.html"));
+});
+
+// API: alertas do usuário logado
+app.get("/api/meus-alertas", exigirLogin, alertasController.listarMeus);
+
+// API: cria um alerta (veículo da garagem + termo da peça desejada)
+app.post("/api/alertas", exigirLogin, alertasController.criar);
+
+// API: remove um alerta (só se for do usuário logado)
+app.delete("/api/alertas/:id", exigirLogin, alertasController.excluir);
+
+// API: notificações do usuário logado
+app.get("/api/notificacoes", exigirLogin, alertasController.listarNotificacoes);
+
+// API: quantas notificações ainda não foram lidas (usada pelo contador do menu)
+app.get("/api/notificacoes/nao-lidas", exigirLogin, alertasController.contarNaoLidas);
+
+// API: marca todas como lidas (precisa vir antes da rota com :id)
+app.put("/api/notificacoes/lidas", exigirLogin, alertasController.marcarTodasLidas);
+
+// API: marca uma notificação como lida
+app.put("/api/notificacoes/:id/lida", exigirLogin, alertasController.marcarLida);
 
 //
 // ROTAS DE VEÍCULOS (garagem do usuário)

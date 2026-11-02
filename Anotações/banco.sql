@@ -62,8 +62,7 @@ CREATE TABLE IF NOT EXISTS interesses (
     FOREIGN KEY (anuncio_id) REFERENCES anuncios(id) ON DELETE CASCADE
 );
 
--- Tabela de avaliaçao de anuncios
-
+-- Tabela de Avaliações (reputação do vendedor)
 CREATE TABLE IF NOT EXISTS avaliacoes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     anuncio_id INT NULL,
@@ -80,4 +79,30 @@ CREATE TABLE IF NOT EXISTS avaliacoes (
     FOREIGN KEY (anuncio_id) REFERENCES anuncios(id) ON DELETE SET NULL,
     FOREIGN KEY (avaliador_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (vendedor_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- Tabela de Alertas de compatibilidade (peça desejada + veículo da garagem)
+CREATE TABLE IF NOT EXISTS alertas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    veiculo_id INT NOT NULL,
+    termo VARCHAR(100) NOT NULL,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (veiculo_id) REFERENCES veiculos(id) ON DELETE CASCADE
+);
+
+-- Tabela de Notificações geradas quando um anúncio compatível é publicado
+CREATE TABLE IF NOT EXISTS notificacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    anuncio_id INT NOT NULL,
+    alerta_id INT NULL,
+    lida TINYINT(1) NOT NULL DEFAULT 0,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- Um usuário recebe no máximo uma notificação por anúncio
+    UNIQUE KEY notificacao_unica (usuario_id, anuncio_id),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (anuncio_id) REFERENCES anuncios(id) ON DELETE CASCADE,
+    FOREIGN KEY (alerta_id) REFERENCES alertas(id) ON DELETE SET NULL
 );
