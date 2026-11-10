@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alertas | The Iron Legacy</title>
+    <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+    <header class="header">
+        <div class="wrap flex-between">
+            <a class="logo" href="/">THE IRON <span>LEGACY</span></a>
+            <nav class="nav">
+                <a href="/anuncios.html">Peças</a>
+                <a href="/garagem">Garagem</a>
+                <a href="/perfil.html">Perfil</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <div class="top">
+            <div>
+                <p class="eyebrow">COMPATIBILIDADE</p>
+                <h1>Alertas</h1>
+                <p class="muted">Diga qual peça você procura e para qual veículo da sua garagem. Quando alguém publicar um anúncio compatível, você é avisado aqui.</p>
+            </div>
+        </div>
+
+        <!-- Notificações recebidas -->
+        <section class="panel espaco-baixo">
+            <div class="flex-between cabecalho-painel">
+                <h2>Notificações <span id="contador-notificacoes" class="muted contador-notificacoes"></span></h2>
+                <button type="button" class="button secondary sm" id="btn-marcar-todas" hidden>Marcar todas como lidas</button>
+            </div>
+            <div id="lista-notificacoes">
+                <p class="muted">Carregando notificações...</p>
+            </div>
+        </section>
+
+        <div class="profilegrid">
+            <!-- Criar alerta -->
+            <section class="panel">
+                <h2>Novo alerta</h2>
+                <form id="form-alerta">
+                    <div class="input-container campo-espaco">
+                        <label for="alerta-veiculo">Veículo da garagem</label>
+                        <select id="alerta-veiculo" required>
+                            <option value="">Carregando...</option>
+                        </select>
+                    </div>
+                    <div class="input-container campo-espaco">
+                        <label for="alerta-termo">Peça desejada</label>
+                        <input id="alerta-termo" type="text" maxlength="100" placeholder="Ex.: carburador" required>
+                        <small class="muted">O alerta dispara quando esse termo aparecer no nome, na categoria ou na descrição do anúncio.</small>
+                    </div>
+                    <p class="muted campo-espaco" id="aviso-sem-veiculo" hidden>
+                        Você ainda não tem veículos cadastrados. <a href="/garagem" class="link-accent"><b>Cadastre um na garagem</b></a> para criar alertas.
+                    </p>
+                    <button type="submit" class="button primary botao-espaco" id="btn-criar-alerta">Criar alerta</button>
+                </form>
+            </section>
+
+            <!-- Alertas existentes -->
+            <section class="panel">
+                <h2>Meus alertas</h2>
+                <div id="lista-alertas" class="campo-espaco">
+                    <p class="muted">Carregando alertas...</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="/js/compartilhado/widgets.js"></script>
+
+    
+    <script src="/js/compartilhado/utils.js"></script>
+    <script src="/js/paginas/alertas.js"></script>
+    <script src="/js/compartilhado/acessibilidade.js"></script>
+    <script src="/js/compartilhado/contato.js"></script>
+    <script src="/js/compartilhado/rodape.js"></script>
+</body>
+</html>

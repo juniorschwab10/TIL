@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do anúncio | The Iron Legacy</title>
+    <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+    <header class="header">
+        <div class="wrap flex-between">
+            <a class="logo" href="/inicio.html">THE IRON <span>LEGACY</span></a>
+            <nav class="nav">
+                <a href="/anuncios.html">Peças</a>
+                <a href="/garagem">Garagem</a>
+                <a href="/perfil.html">Perfil</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <a class="back" href="/anuncios.html">&larr; Voltar para anúncios</a>
+
+        <section class="detail" id="conteudo-anuncio">
+            <p class="muted">Carregando detalhes do anúncio...</p>
+        </section>
+
+        <!-- Avaliações do vendedor (preenchida pelo avaliacoes.js) -->
+        <section id="secao-avaliacoes"></section>
+    </main>
+
+    <script src="/js/compartilhado/widgets.js"></script>
+
+    
+    <!-- 3. Scripts Separados (a ordem importa: utils → detalhes → avaliações) -->
+    <script src="/js/compartilhado/utils.js"></script>
+    <script src="/js/paginas/anuncio-detalhes.js"></script>
+    <script src="/js/paginas/avaliacoes.js"></script>
+    <script src="/js/compartilhado/acessibilidade.js"></script>
+    <script src="/js/compartilhado/contato.js"></script>
+    <script src="/js/compartilhado/rodape.js"></script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 const fs = require("fs/promises");
 const anuncios = require("../models/anuncios");
 const imagens = require("../models/imagens");
+const usuarios = require("../models/usuarios");
+const alertasController = require("./alertasController");
 const { cloudinary } = require("../config/upload");
 
 const LIMITE_FOTOS = 3;
@@ -13,6 +15,134 @@ async function limparTemporarios(arquivos) {
         await fs.unlink(arquivo.path).catch(() => {});
     }
 }
+
+// ------------------------------ CATÁLOGO ----------------------------------
+
+// Lista de anúncios (pública). Aceita busca por palavra-chave, filtros
+// combinados e ordenação via query string, por exemplo:
+//   /api/anuncios?busca=carburador&categoria=Motor&ordenar=menor-preco
+async function listar(req, res) {
+    try {
+        const { busca, marca, modelo, ano, categoria, condicao, localizacao, ordenar } = req.query;
+
+        // Ano precisa ser um número válido pra entrar no filtro — um
+        // "?ano=abc" na URL, por exemplo, é simplesmente ignorado.
+        const anoNumero = Number(ano);
+
+        const lista = await anuncios.listarTodos({
+            busca: busca?.trim() || undefined,
+            marca: marca?.trim() || undefined,
+            modelo: modelo?.trim() || undefined,
+            ano: ano && Number.isInteger(anoNumero) ? anoNumero : undefined,
+            categoria: categoria?.trim() || undefined,
+            condicao: condicao?.trim() || undefined,
+            localizacao: localizacao?.trim() || undefined,
+            ordenar: ordenar?.trim() || undefined
+        });
+
+        res.json(lista);
+    } catch (erro) {
+        console.error("Erro ao listar anúncios:", erro);
+        res.status(500).json({ erro: "Erro ao buscar a listagem de anúncios." });
+    }
+}
+
+// Detalhes de um anúncio: dados + fotos + vendedor
+async function detalhar(req, res) {
+    try {
+        const anuncio = await anuncios.buscarPorId(req.params.id);
+
+        if (!anuncio) {
+            return res.status(404).json({ erro: "Anúncio não encontrado." });
+        }
+
+        const vendedor = await usuarios.buscarPorId(anuncio.usuario_id);
+        const fotos = await imagens.listarPorAnuncio(anuncio.id);
+
+        res.json({
+            ...anuncio,
+            imagens: fotos.map((f) => f.url),
+            vendedor: vendedor ? {
+                nome: vendedor.nome,
+                email: vendedor.email,
+                telefone: vendedor.telefone
+            } : null
+        });
+    } catch (erro) {
+        console.error("Erro ao buscar detalhes do anúncio:", erro);
+        res.status(500).json({ erro: "Erro ao carregar os detalhes do anúncio." });
+    }
+}
+
+// ------------------------------ PUBLICAR ----------------------------------
+
+// Processa o formulário de "publicar-anuncio.html". Antes desta função,
+// o multer (upload.array) já salvou até 3 fotos em uploads/ e as colocou
+// em req.files (um array, vazio se a pessoa não escolheu foto).
+async function publicar(req, res) {
+    const { nome, categoria, descricao, condicao, preco, marca, modelo, ano_inicial, ano_final, localizacao } = req.body;
+
+    if (!nome || !preco) {
+        await limparTemporarios(req.files);
+        return res.status(400).send("O nome e o preço da peça são obrigatórios.");
+    }
+
+    try {
+        const idAnuncio = await anuncios.criar({
+            usuarioId: req.session.usuarioId,
+            nome,
+            categoria,
+            descricao,
+            condicao,
+            preco: parseFloat(preco),
+            marca,
+            modelo,
+            anoInicial: ano_inicial || null,
+            anoFinal: ano_final || null,
+            localizacao
+        });
+
+        for (const arquivo of req.files) {
+            const resultado = await cloudinary.uploader.upload(arquivo.path, {
+                folder: "til-anuncios"
+            });
+
+            // Guardamos o public_id também: é o que permite apagar a foto
+            // do Cloudinary depois, se o usuário excluir a foto ou o anúncio.
+            await imagens.adicionar(idAnuncio, resultado.secure_url, resultado.public_id);
+
+            // Apaga o arquivo temporário — já está hospedado no Cloudinary.
+            await fs.unlink(arquivo.path);
+        }
+
+        // Cruza o anúncio com os alertas de compatibilidade e notifica quem
+        // procurava essa peça. Se der erro aqui, o anúncio já foi publicado:
+        // só registramos no console e seguimos.
+        try {
+            await alertasController.gerarNotificacoes({
+                id: idAnuncio,
+                usuario_id: req.session.usuarioId,
+                nome,
+                categoria,
+                descricao,
+                marca,
+                modelo,
+                ano_inicial,
+                ano_final
+            });
+        } catch (erroAlerta) {
+            console.error("Erro ao gerar notificações de alertas:", erroAlerta);
+        }
+
+        res.redirect("/anuncios.html");
+    } catch (erro) {
+        await limparTemporarios(req.files);
+        console.error("Erro detalhado ao publicar anúncio:", erro);
+        res.status(500).send("Erro interno ao publicar o anúncio.");
+    }
+}
+
+// ------------------------------ MEUS ANÚNCIOS -----------------------------
 
 // Lista os anúncios do usuário logado — usado na tela "Meus anúncios".
 async function listarMeus(req, res) {
@@ -180,6 +310,9 @@ async function excluir(req, res) {
 }
 
 module.exports = {
+    listar,
+    detalhar,
+    publicar,
     listarMeus,
     buscarParaEditar,
     atualizar,

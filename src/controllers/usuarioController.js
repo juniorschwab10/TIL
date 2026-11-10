@@ -1,97 +1,46 @@
-const bcrypt = require("bcryptjs");
+// Perfil do usuário logado (a página "Meu perfil").
 const usuarios = require("../models/usuarios");
+const anuncios = require("../models/anuncios");
+const veiculos = require("../models/veiculos");
 
-async function cadastrar(req, res) {
-    const { nome, email, telefone, senha, confirmar_senha } = req.body;
+// Dados do usuário + contagens da seção "Minha atividade"
+async function meuPerfil(req, res) {
+    try {
+        const usuario = await usuarios.buscarPorId(req.session.usuarioId);
+        if (!usuario) {
+            return res.status(404).json({ erro: "Usuário não encontrado." });
+        }
 
-    if (!nome || !email || !telefone || !senha) {
-        return res.status(400).send("Preencha todos os campos.");
+        const totalAnuncios = await anuncios.contarPorUsuario(req.session.usuarioId);
+        const totalVeiculos = await veiculos.contarPorUsuario(req.session.usuarioId);
+
+        res.json({ ...usuario, totalAnuncios, totalVeiculos });
+    } catch (erro) {
+        console.error("Erro ao buscar perfil:", erro);
+        res.status(500).json({ erro: "Erro no servidor." });
     }
+}
 
-    if (senha.length < 6) {
-        return res.status(400).send("A senha deve ter pelo menos 6 caracteres.");
-    }
+async function atualizarMeuPerfil(req, res) {
+    const { nome, email, telefone } = req.body;
 
-    if (senha !== confirmar_senha) {
-        return res.status(400).send("As senhas não coincidem.");
+    if (!nome || !email || !telefone) {
+        return res.status(400).json({ erro: "Preencha todos os campos." });
     }
 
     try {
+        // E-mail sempre em minúsculas, igual ao cadastro, senão o login falha
         const emailFormatado = email.trim().toLowerCase();
-        const senhaHash = await bcrypt.hash(senha, 10);
 
-        await usuarios.criar(nome, emailFormatado, telefone, senhaHash);
-        return res.redirect("/login");
+        await usuarios.atualizar(req.session.usuarioId, nome, emailFormatado, telefone);
+        res.json({ mensagem: "Perfil atualizado com sucesso!" });
     } catch (erro) {
         if (erro.code === "ER_DUP_ENTRY") {
-            return res.status(409).send("Este e-mail já está cadastrado.");
+            return res.status(409).json({ erro: "Este e-mail já está em uso." });
         }
-        console.error("Erro ao cadastrar usuário:", erro);
-        return res.status(500).send("Não foi possível realizar o cadastro.");
+        console.error("Erro ao atualizar perfil:", erro);
+        res.status(500).json({ erro: "Erro ao atualizar os dados." });
     }
 }
 
-async function login(req, res) {
-    const { email, senha } = req.body;
-
-    try {
-        const usuario = await usuarios.buscarPorEmail(email);
-        if (!usuario) return res.redirect("/login");
-
-        const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
-        if (!senhaCorreta) return res.redirect("/login");
-
-        req.session.usuarioId = usuario.id;
-        return res.redirect("/");
-    } catch (erro) {
-        console.error("Erro ao fazer login:", erro);
-        return res.redirect("/login");
-    }
-}
-
-function logout(req, res) {
-    req.session.destroy(() => {
-        res.redirect("/");
-    });
-}
-
-async function listarPainelAdm(req, res) {
-    try {
-        const listaUsuarios = await usuarios.listarTodos();
-        return res.render("adm", { usuarios: listaUsuarios }); 
-    } catch (erro) {
-        console.error("Erro ao carregar painel adm:", erro);
-        return res.status(500).send("Erro ao carregar o painel.");
-    }
-}
-
-async function atualizar(req, res) {
-    const { nome, email, telefone, senha } = req.body;
-    try {
-        const senhaHash = senha ? await bcrypt.hash(senha, 10) : undefined;
-        await usuarios.atualizar(req.params.id, nome, email, telefone, senhaHash);
-        return res.redirect("/adm");
-    } catch (erro) {
-        console.error("Erro ao editar usuário:", erro);
-        return res.redirect("/adm");
-    }
-}
-
-async function excluir(req, res) {
-    try {
-        await usuarios.excluir(req.params.id);
-        return res.redirect("/adm");
-    } catch (erro) {
-        console.error("Erro ao excluir usuário:", erro);
-        return res.status(500).send("Erro ao excluir usuário.");
-    }
-}
-
-module.exports = {
-    cadastrar,
-    login,
-    logout,
-    listarPainelAdm,
-    atualizar,
-    excluir
-};
+module.exports = { meuPerfil, atualizarMeuPerfil };

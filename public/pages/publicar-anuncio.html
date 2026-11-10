@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <title>Publicar anúncio | The Iron Legacy</title>
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <header class="header">
+    <div class="wrap">
+      <a class="logo" href="/">THE IRON <span>LEGACY</span></a>
+      <nav>
+        <a href="/anuncios.html">Peças</a>
+        <a href="/garagem">Garagem</a>
+        <a href="/perfil.html">Perfil</a>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="wrap">
+    <div class="heading">
+      <p class="eyebrow">VENDA SUA PEÇA</p>
+      <h1>Publicar anúncio</h1>
+      <p class="muted">Preencha as informações para disponibilizar sua peça.</p>
+    </div>
+
+
+    <!--
+      enctype="multipart/form-data" é OBRIGATÓRIO para enviar arquivos.
+      Sem isso, o navegador manda só o NOME do arquivo (texto), não o
+      arquivo em si, e o req.file chega vazio no servidor.
+    -->
+    <form class="publish" method="POST" action="/anuncios" enctype="multipart/form-data">
+    <section class="panel">
+        <h2>Informações da peça</h2>
+
+        <div class="grid">
+            <div class="input-container">
+                <label>Nome da peça</label>
+                <input name="nome" placeholder="Ex.: Carburador Weber 40" required/>
+            </div>
+
+            <div class="input-container">
+                <label>Categoria</label>
+                <select name="categoria">
+                    <option value="">Selecione</option>
+                    <option value="Motor">Motor</option>
+                    <option value="Carroceria">Carroceria</option>
+                    <option value="Eletrica">Elétrica</option>
+                </select>
+            </div>
+        </div>
+
+        <!--
+          Marca/modelo/ano são do VEÍCULO com o qual a peça é compatível —
+          é isso que alimenta os filtros de busca do catálogo. Se a peça
+          servir em qualquer veículo, deixe em branco.
+        -->
+        <div class="grid">
+            <div class="input-container">
+                <label>Marca compatível</label>
+                <input name="marca" placeholder="Ex.: Chevrolet"/>
+            </div>
+
+            <div class="input-container">
+                <label>Modelo compatível</label>
+                <input name="modelo" placeholder="Ex.: Opala"/>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="input-container">
+                <label>Ano inicial</label>
+                <input name="ano_inicial" type="number" placeholder="Ex.: 1975"/>
+            </div>
+
+            <div class="input-container">
+                <label>Ano final</label>
+                <input name="ano_final" type="number" placeholder="Opcional"/>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <label>Localização</label>
+            <input name="localizacao" placeholder="Ex.: Foz do Iguaçu, PR"/>
+        </div>
+
+        <div class="input-container">
+            <label>Fotos da peça (até 3)</label>
+            <!--
+              multiple: permite escolher vários arquivos de uma vez.
+              name="imagens" (plural) tem que bater com o
+              upload.array("imagens", 3) do server.js.
+            -->
+            <input type="file" name="imagens" accept="image/*" id="input-imagens" multiple/>
+            <small class="muted">Opcional. Escolha até 3 fotos. Formatos aceitos: JPG, PNG, WEBP (cada uma até 5MB).</small>
+            <!-- Prévia das fotos escolhidas, preenchida pelo script no fim da página.
+                 Só aparece depois que o usuário escolhe pelo menos 1 arquivo. -->
+            <div id="previa-imagens-wrapper" class="previa-imagens" hidden></div>
+        </div>
+
+        <div class="input-container">
+            <label>Descrição</label>
+            <textarea name="descricao" placeholder="Descreva a peça..." rows="7"></textarea>
+        </div>
+
+        <div class="grid">
+            <div class="input-container">
+                <label>Condição</label>
+                <select name="condicao">
+                    <option value="Usada">Usada</option>
+                    <option value="Nova">Nova</option>
+                </select>
+            </div>
+
+            <div class="input-container">
+                <label>Preço</label>
+                <input name="preco" placeholder="0,00" type="number" step="0.01" required/>
+            </div>
+        </div>
+
+        <button class="button primary" type="submit">Publicar anúncio</button>
+    </section>
+    </form>
+  </main>
+
+  <script src="/js/compartilhado/widgets.js"></script>
+
+    
+    <!-- Controla a seleção de fotos "na mão", porque o <input type="file">
+         sozinho SUBSTITUI a seleção toda vez que o seletor é reaberto —
+         por isso a foto anterior "sumia" ao escolher outra. Aqui a gente
+         guarda os arquivos numa lista própria (arquivosSelecionados) que
+         só é limpa quando o usuário remove algo, nunca sozinha. -->
+    <script src="/js/paginas/publicar-anuncio.js"></script>
+
+    <!-- 3. Script do Painel de Acessibilidade -->
+    <script src="/js/compartilhado/acessibilidade.js"></script>
+    <script src="/js/compartilhado/contato.js"></script>
+    <script src="/js/compartilhado/rodape.js"></script>
+</body>
+</html>

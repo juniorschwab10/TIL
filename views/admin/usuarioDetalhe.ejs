@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuário #<%= usuario.id %> | The Iron Legacy</title>
+    <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+    <header class="header">
+        <div class="wrap flex-between">
+            <div>
+                <a class="logo" href="/">THE IRON <span>LEGACY</span></a>
+                <span class="badge-adm">ADMIN</span>
+            </div>
+            <nav class="nav">
+                <a href="/adm">Painel</a>
+                <a href="/logout">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap main-adm">
+        <a class="back" href="/adm">&larr; Voltar para o painel</a>
+
+        <div class="adm-top">
+            <div>
+                <p class="eyebrow">DETALHES DO USUÁRIO</p>
+                <h1><%= usuario.nome %></h1>
+            </div>
+        </div>
+
+        <section class="panel painel-estreito">
+            <div class="adm-card-header">
+                <h3>ID</h3>
+            </div>
+            <p class="campo-detalhe"><%= usuario.id %></p>
+
+            <div class="adm-card-header">
+                <h3>Nome completo</h3>
+            </div>
+            <p class="campo-detalhe"><%= usuario.nome %></p>
+
+            <div class="adm-card-header">
+                <h3>E-mail</h3>
+            </div>
+            <p class="campo-detalhe"><%= usuario.email %></p>
+
+            <div class="adm-card-header">
+                <h3>Telefone</h3>
+            </div>
+            <p class="campo-detalhe campo-detalhe--ultimo"><%= usuario.telefone %></p>
+
+            <div class="acoes-linha">
+                <a class="button primary" href="/usuarios/<%= usuario.id %>/editar">Editar</a>
+                <a class="button secondary" href="/adm">Voltar</a>
+            </div>
+        </section>
+    </main>
+    <script src="/js/compartilhado/contato.js"></script>
+    <script src="/js/compartilhado/rodape.js"></script>
+</body>
+</html>

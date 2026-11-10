@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha garagem | The Iron Legacy</title>
+    <link rel="stylesheet" href="/css/estilo.css">
+    </head>
+<body>
+    <header class="header">
+        <div class="wrap flex-between">
+            <a class="logo" href="/">THE IRON <span>LEGACY</span></a>
+            <nav class="nav">
+                <a href="/anuncios.html">Peças</a>
+                <a href="/garagem">Garagem</a>
+                <a href="/perfil.html">Perfil</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <div class="top">
+            <div>
+                <p class="eyebrow">MEUS VEÍCULOS</p>
+                <h1>Minha garagem</h1>
+                <p class="muted">Cadastre os veículos clássicos que você possui.</p>
+            </div>
+            <button class="button primary" id="btn-novo-veiculo">+ Adicionar veículo</button>
+        </div>
+
+        <section class="panel form oculto" id="painel-form-veiculo">
+            <h2 id="titulo-form-veiculo">Novo veículo</h2>
+            <form id="form-veiculo">
+                <input type="hidden" id="veiculo-id" value="">
+
+                <div class="grid">
+                    <div class="input-container">
+                        <label for="veiculo-marca">Marca</label>
+                        <input id="veiculo-marca" type="text" placeholder="Ex.: Chevrolet" required>
+                    </div>
+                    <div class="input-container">
+                        <label for="veiculo-modelo">Modelo</label>
+                        <input id="veiculo-modelo" type="text" placeholder="Ex.: Opala" required>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="input-container">
+                        <label for="veiculo-ano-inicial">Ano</label>
+                        <input id="veiculo-ano-inicial" type="number" placeholder="Ex.: 1975" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <button type="submit" class="button primary">Salvar veículo</button>
+                    <button type="button" class="button secondary" id="btn-cancelar-veiculo">Cancelar</button>
+                </div>
+            </form>
+        </section>
+
+        <div class="vehicles" id="container-veiculos">
+            <p class="muted">Carregando seus veículos...</p>
+        </div>
+    </main>
+
+    <script src="/js/compartilhado/widgets.js"></script>
+
+    
+    <script src="/js/compartilhado/utils.js"></script>
+    <script src="/js/paginas/garagem.js"></script>
+    <script src="/js/compartilhado/acessibilidade.js"></script>
+    <script src="/js/compartilhado/contato.js"></script>
+    <script src="/js/compartilhado/rodape.js"></script>
+</body>
+</html>
